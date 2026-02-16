@@ -3,6 +3,22 @@
 
 This repository contains the preliminary analysis and visualization code for Report 1 of the Big Data course project using the UCI Online News Popularity dataset (ID: 332).
 
+## 🚀 Quick Start
+
+```bash
+# 1. Install dependencies (first time only)
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+# 2. Run analysis on full dataset (for report)
+source .venv/bin/activate  # Activate virtual environment
+python report_1.py data/full_dataset.csv
+
+# OR run on subset (for testing)
+python report_1.py data/subset.csv
+```
+
 ## Project Overview
 
 The UCI Online News Popularity dataset contains approximately 39,000 online news articles published by Mashable with around 60 numeric features related to content, sentiment, topics, and publication timing. The target variable is `shares`, representing the number of times an article was shared on social media.
@@ -22,7 +38,8 @@ The UCI Online News Popularity dataset contains approximately 39,000 online news
 ```
 .
 ├── data/
-│   └── subset.csv              # 100-row deterministic subset
+│   ├── full_dataset.csv        # Full dataset (~39,644 rows) - USE THIS FOR REPORT
+│   └── subset.csv              # 100-row deterministic subset (for testing)
 ├── figures/                    # Generated visualizations folder
 │   ├── fig1_hist_shares.png
 │   ├── fig2_boxplot_shares.png
@@ -31,6 +48,8 @@ The UCI Online News Popularity dataset contains approximately 39,000 online news
 │   └── fig5_bar_chart.png
 ├── report_1.py                 # Main analysis script
 ├── create_subset.py            # Script to generate subset from full dataset
+├── download_full_dataset.py    # Script to download full dataset from UCI
+├── validate.py                 # Validation script
 ├── requirements.txt            # Python dependencies
 └── README.md                   # This file
 ```
@@ -48,35 +67,73 @@ The UCI Online News Popularity dataset contains approximately 39,000 online news
 ## Installation
 
 1. Clone or download this repository
-2. Install dependencies:
+2. **Set up virtual environment (recommended):**
+
+```bash
+# Create virtual environment
+python3 -m venv .venv
+
+# Activate virtual environment
+# On macOS/Linux:
+source .venv/bin/activate
+# On Windows:
+# .venv\Scripts\activate
+```
+
+3. **Install all dependencies:**
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Or if you're using a virtual environment:
+This will install:
+- pandas >= 2.0.0
+- numpy >= 1.24.0
+- matplotlib >= 3.7.0
+- seaborn >= 0.12.0
+- scipy >= 1.10.0
+- ucimlrepo >= 0.0.7
 
+**Note:** Always activate the virtual environment before running scripts:
 ```bash
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+source .venv/bin/activate  # Run this each time you open a new terminal
 ```
 
 ## Usage
 
 ### Running the Analysis
 
-The main analysis script accepts the subset CSV file as a command-line argument:
+**⚠️ IMPORTANT:** Always activate the virtual environment first:
+```bash
+source .venv/bin/activate
+```
 
+** (use full dataset - represents entire dataset):**
+```bash
+python report_1.py data/full_dataset.csv
+```
+
+** (use subset - faster):**
 ```bash
 python report_1.py data/subset.csv
+```
+
+**One-line command** (full dataset):
+```bash
+source .venv/bin/activate && python report_1.py data/full_dataset.csv
+```
+
+**One-line command** (subset):
+```bash
+source .venv/bin/activate && python report_1.py data/subset.csv
 ```
 
 ### Output
 
 The script will:
 1. Print an "ANALYSIS" section with computed metrics in a table format
-2. Generate and save 5 visualization figures to the `figures/` folder (PNG files with 200+ DPI)
+2. **Display** 5 visualization windows (one at a time - close each to see the next)
+3. **Save** 5 visualization figures to the `figures/` folder (PNG files with 200+ DPI)
 
 **Metrics Computed:**
 - **Range**: [min, max] for numeric columns
@@ -92,9 +149,19 @@ The script will:
 4. `figures/fig4_scatter_plot.png` - Scatter plot: n_tokens_content vs shares
 5. `figures/fig5_bar_chart.png` - Bar chart: average shares by weekday
 
+### Downloading the Full Dataset
+
+If you need to download the full dataset:
+
+```bash
+python download_full_dataset.py
+```
+
+This will download ~39,644 rows and save to `data/full_dataset.csv`.
+
 ### Creating a New Subset (Optional)
 
-If you need to regenerate the subset or create one from a different dataset:
+If you need to regenerate the subset for testing:
 
 ```bash
 # Download from UCI and create subset
@@ -167,8 +234,10 @@ Saved: figures/fig5_bar_chart.png
 - This is **Report 1** focusing on preliminary analysis only
 - No predictive modeling (regression/classification) is included yet
 - No clustering or association rule mining in this phase
-- The script uses a non-interactive matplotlib backend (saves figures without displaying windows)
-- All visualizations are automatically saved to the `figures/` folder as PNG files
+- The script **displays** figures in windows AND saves them to the `figures/` folder
+- All visualizations are saved as PNG files (200+ DPI) for inclusion in reports
+- **For your report:** Use `data/full_dataset.csv` to represent the entire dataset
+- **For testing:** Use `data/subset.csv` for faster iteration
 
 ## Contact & Attribution
 
