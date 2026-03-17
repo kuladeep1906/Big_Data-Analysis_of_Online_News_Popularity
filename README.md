@@ -1,29 +1,36 @@
-# Big Data Course Project - Report 1
+# Big Data Course Project
 ## UCI Online News Popularity Dataset Analysis
 
-This repository contains the preliminary analysis and visualization code for Report 1 of the Big Data course project using the UCI Online News Popularity dataset (ID: 332).
+This repository contains the complete analysis pipeline for the Big Data course project using the UCI Online News Popularity dataset (ID: 332).
 
 ## 🚀 Quick Start
 
 ```bash
-# 1. Install dependencies (first time only)
+# 1. Install Java 17 LTS (required for PySpark)
+brew install --cask temurin@17
+export JAVA_HOME=$(/usr/libexec/java_home -v 17)   # add to ~/.zshrc to persist
+
+# 2. Set up Python virtual environment (first time only)
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
-# 2. Run analysis on full dataset (for report)
-source .venv/bin/activate  # Activate virtual environment
-python report_1.py data/full_dataset.csv
-
-# OR run on subset (for testing)
+# 3. Run EDA on subset (Report 1)
 python report_1.py data/subset.csv
+
+# 4. Run full pipeline — single command
+python report_2_task.py data/full_dataset.csv
+# Or on the 500-row subset (faster, for professor testing):
+python report_2_task.py data/subset.csv
 ```
 
 ## Project Overview
 
-The UCI Online News Popularity dataset contains approximately 39,000 online news articles published by Mashable with around 60 numeric features related to content, sentiment, topics, and publication timing. The target variable is `shares`, representing the number of times an article was shared on social media.
+The UCI Online News Popularity dataset contains approximately 39,644 online news articles published by Mashable with around 60 numeric features related to content, sentiment, topics, and publication timing. The target variable is `shares`, representing the number of times an article was shared on social media.
 
-**Report 1 Focus**: Statistical analysis and visualization (no predictive modeling)
+The project is split into two entry-point scripts:
+- **`report_1.py`** — EDA and visualization on the 500-row subset
+- **`report_2_task.py`** — Full pipeline: Classification, Regression, Clustering, Association Rules, Dimensionality Reduction, Temporal Analysis, Feature Importance, and PySpark
 
 ## Dataset Information
 
@@ -38,61 +45,73 @@ The UCI Online News Popularity dataset contains approximately 39,000 online news
 ```
 .
 ├── data/
-│   ├── full_dataset.csv        # Full dataset (~39,644 rows) - USE THIS FOR REPORT
-│   └── subset.csv              # 100-row deterministic subset (for testing)
-├── figures/                    # Generated visualizations folder
-│   ├── fig1_hist_shares.png
-│   ├── fig2_boxplot_shares.png
-│   ├── fig3_correlation_heatmap.png
-│   ├── fig4_scatter_plot.png
-│   └── fig5_bar_chart.png
-├── report_1.py                 # Main analysis script
-├── create_subset.py            # Script to generate subset from full dataset
-├── download_full_dataset.py    # Script to download full dataset from UCI
-├── validate.py                 # Validation script
+│   ├── full_dataset.csv        # Full dataset (~39,644 rows)
+│   └── subset.csv              # 500-row deterministic subset (seed=42)
+├── figures/                    # All generated visualizations
+├── src/
+│   ├── preprocessing.py        # Data loading, cleaning, train/test split
+│   ├── classification.py       # Logistic Regression + Random Forest
+│   ├── regression.py           # Linear, Ridge, Random Forest Regressor
+│   ├── clustering.py           # K-Means + DBSCAN
+│   ├── association_rules.py    # Apriori (mlxtend)
+│   ├── dimensionality_reduction.py  # PCA + t-SNE
+│   ├── temporal_analysis.py    # Weekday/weekend analysis
+│   ├── feature_importance.py   # Gini + Permutation importance
+│   └── spark_pipeline.py       # PySpark MLlib pipeline
+├── report_1.py                 # EDA and visualization (subset)
+├── report_2_task.py            # Unified full pipeline runner
+├── create_subset.py            # Generates the 500-row subset
+├── download_full_dataset.py    # Downloads full dataset from UCI
 ├── requirements.txt            # Python dependencies
 └── README.md                   # This file
 ```
 
 ## Requirements
 
-- Python 3.7+
+### System (install before Python packages)
+| Requirement | Version | Install |
+|---|---|---|
+| **Java 17 LTS** | Temurin 17 | `brew install --cask temurin@17` |
+| Python | 3.7+ | — |
+
+> ⚠️ **Java 17 is required for PySpark.** Java 23+ removes internal APIs that PySpark depends on and will cause a runtime error. Do **not** use Java 21, 23, or 25.
+
+After installing Java 17, set `JAVA_HOME` and persist it:
+```bash
+export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+echo 'export JAVA_HOME=$(/usr/libexec/java_home -v 17)' >> ~/.zshrc
+```
+
+### Python packages (installed via pip)
 - pandas >= 2.0.0
 - numpy >= 1.24.0
 - matplotlib >= 3.7.0
 - seaborn >= 0.12.0
 - scipy >= 1.10.0
+- scikit-learn >= 1.3.0
+- mlxtend >= 0.23.0
+- pyspark >= 3.4.0
 - ucimlrepo >= 0.0.7
 
 ## Installation
 
-1. Clone or download this repository
-2. **Set up virtual environment (recommended):**
-
+1. **Install Java 17 LTS:**
 ```bash
-# Create virtual environment
-python3 -m venv .venv
-
-# Activate virtual environment
-# On macOS/Linux:
-source .venv/bin/activate
-# On Windows:
-# .venv\Scripts\activate
+brew install --cask temurin@17
+export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+echo 'export JAVA_HOME=$(/usr/libexec/java_home -v 17)' >> ~/.zshrc
 ```
 
-3. **Install all dependencies:**
+2. **Create virtual environment:**
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
 
+3. **Install Python dependencies:**
 ```bash
 pip install -r requirements.txt
 ```
-
-This will install:
-- pandas >= 2.0.0
-- numpy >= 1.24.0
-- matplotlib >= 3.7.0
-- seaborn >= 0.12.0
-- scipy >= 1.10.0
-- ucimlrepo >= 0.0.7
 
 **Note:** Always activate the virtual environment before running scripts:
 ```bash
@@ -101,32 +120,24 @@ source .venv/bin/activate  # Run this each time you open a new terminal
 
 ## Usage
 
-### Running the Analysis
-
-**⚠️ IMPORTANT:** Always activate the virtual environment first:
+### Run Report 1 (EDA on subset)
 ```bash
 source .venv/bin/activate
-```
-
-** (use full dataset - represents entire dataset):**
-```bash
-python report_1.py data/full_dataset.csv
-```
-
-** (use subset - faster):**
-```bash
 python report_1.py data/subset.csv
 ```
 
-**One-line command** (full dataset):
+### Run the full pipeline (single command)
 ```bash
-source .venv/bin/activate && python report_1.py data/full_dataset.csv
+source .venv/bin/activate
+
+# Full dataset:
+python report_2_task.py data/full_dataset.csv
+
+# 500-row subset (professor testing):
+python report_2_task.py data/subset.csv
 ```
 
-**One-line command** (subset):
-```bash
-source .venv/bin/activate && python report_1.py data/subset.csv
-```
+`report_2_task.py` runs all 10 tasks in order: Preprocessing → Classification → Regression → Clustering → Association Rules → Dimensionality Reduction → Temporal Analysis → Feature Importance → Spark Pipeline.
 
 ### Output
 
@@ -193,12 +204,16 @@ The script is organized into clear functions:
 
 ### create_subset.py
 
-Helper script to create the deterministic 100-row subset:
+Helper script to create the deterministic 500-row subset:
 
 - Attempts to download from UCI using `ucimlrepo`
 - Falls back to local CSV if provided
 - Uses fixed random seed (42) for reproducibility
 - Saves to `data/subset.csv`
+
+```bash
+python create_subset.py data/full_dataset.csv
+```
 
 ## Example Output
 
@@ -220,14 +235,14 @@ Saved: figures/fig5_bar_chart.png
 
 ## Features
 
-✅ Deterministic 100-row subset with fixed random seed  
+✅ Deterministic 500-row subset with fixed random seed  
+✅ Unified pipeline — single command runs everything  
 ✅ Clean command-line interface  
 ✅ Robust error handling  
 ✅ Five different visualization techniques  
 ✅ High-resolution figures (200+ DPI) ready for reports  
 ✅ Clean metrics table output  
-✅ No unnecessary debug messages  
-✅ Graceful fallbacks for missing columns  
+✅ PySpark distributed pipeline (requires Java 17 LTS)  
 
 ## Notes
 

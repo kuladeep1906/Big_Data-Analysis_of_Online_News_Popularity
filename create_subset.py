@@ -15,7 +15,7 @@ import os
 
 # Fixed random seed for reproducibility
 RANDOM_SEED = 42
-SUBSET_SIZE = 100
+SUBSET_SIZE = 500
 OUTPUT_FILE = "data/subset.csv"
 
 
