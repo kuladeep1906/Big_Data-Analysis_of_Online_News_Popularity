@@ -1,52 +1,57 @@
 #!/usr/bin/env python3
 """
-Report — Unified Entry Script
-Big Data Course Project — UCI Online News Popularity Dataset
+Report 2 - Unified Entry Script
+Big Data Course Project - UCI Online News Popularity Dataset
 
 Usage:
     python report_2_task.py <location_of_data_file>
 
-This script runs the ENTIRE experimental pipeline in a single execution:
-  0.  EDA — Statistical table (Range, Mean, Mode, Std, Median) + 5 raw plots
-  1.  Preprocessing (correlation removal, scaling)
-  1b. Post-Preprocessing EDA — 4 before/after comparison plots
-  2.  Classification (Logistic Regression, Random Forest)
-  3.  Regression (Linear, Ridge, Random Forest)
-  4.  Clustering (K-Means, DBSCAN)
-  5.  Association Rule Mining (Apriori)
-  6.  Dimensionality Reduction (PCA, t-SNE)
-  7.  Temporal Trend Analysis
-  8.  Feature Importance (Gini, Permutation)
-  9.  Spark Pipeline (PySpark Random Forest)
-  10. ML Pipeline Comparison (Before vs After Preprocessing)
+Pipeline (4 Phases):
+  PHASE 1: DATA PREPARATION
+    Step 1: Data Cleaning (explicit, verbose)
+    Step 2: EDA (exploratory data analysis)
+
+  PHASE 2: FEATURE ENGINEERING
+    Step 3: Preliminary Feature Analysis & Selection (CRITICAL)
+    Step 4: Dimensionality Reduction (PCA, t-SNE on selected features)
+
+  PHASE 3: TASK EXECUTION (6 Named Tasks)
+    Task 1: Predicting Whether a News Article Will Be Popular (Classification)
+    Task 2: Predicting the Number of Shares (Regression)
+    Task 3: Discovering Natural Groupings of News Articles (Clustering)
+    Task 4: Identifying Content Patterns for High Engagement (Association Rules)
+    Task 5: Optimizing Article Formatting and Media Usage (Regression)
+    Task 6: Recommending the Optimal Publication Window (Classification)
+
+  PHASE 4: SCALABILITY
+    Spark Pipeline (distributed ML demonstration)
 """
 
 import sys
 import os
+import warnings
+
+# Suppress common warnings for cleaner output
+warnings.filterwarnings('ignore', category=FutureWarning)
+warnings.filterwarnings('ignore', category=UserWarning)
 
 # Ensure project root is on the path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from src.eda import run_eda, run_post_preprocessing_eda
-from src.preprocessing import load_and_clean, drop_correlated, prepare_classification, prepare_regression
-from src.classification import run_classification
-from src.regression import run_regression
-from src.clustering import run_clustering
-from src.association_rules import run_association_rules
+# Force non-interactive matplotlib backend
+import matplotlib
+matplotlib.use('Agg')
+
+from src.data_cleaning import run_data_cleaning
+from src.eda import run_eda
+from src.feature_importance import run_feature_selection
 from src.dimensionality_reduction import run_dimensionality_reduction
-from src.temporal_analysis import run_temporal_analysis
-from src.feature_importance import run_feature_importance
+from src.preprocessing import prepare_splits
+from src.classification import run_task1_popularity_classification, run_task6_publication_window
+from src.regression import run_task2_shares_regression, run_task5_formatting_optimization
+from src.clustering import run_task3_clustering
+from src.association_rules import run_task4_association_rules
 from src.spark_pipeline import run_spark_pipeline
-from src.ml_pipeline_comparison import run_comparison_experiment
-from src.ml_visualizations import run_comparison_visualizations
-
-
-def banner(title):
-    """Print a clear section banner."""
-    print("\n")
-    print("=" * 60)
-    print(f"  ===== {title} =====")
-    print("=" * 60)
 
 
 def main():
@@ -62,113 +67,111 @@ def main():
         print(f"Error: file '{filepath}' does not exist.")
         sys.exit(1)
 
-    # ------------------------------------------------------------------ #
-    #  STEP 0 — EDA (Preliminary Analysis, formerly report_1.py)
-    # ------------------------------------------------------------------ #
-    banner("EDA — PRELIMINARY ANALYSIS")
+    print("\n" + "#" * 70)
+    print("#  ONLINE NEWS POPULARITY ANALYSIS")
+    print("#  Big Data Course Project - Report 2")
+    print("#" * 70)
 
-    # Load raw data (with url/timedelta stripped, no other changes)
-    df_raw = load_and_clean(filepath)
-    run_eda(df_raw)
+    # ================================================================== #
+    #  PHASE 1: DATA PREPARATION
+    # ================================================================== #
+    print("\n\n" + "#" * 70)
+    print("#  PHASE 1: DATA PREPARATION")
+    print("#" * 70)
 
-    # ------------------------------------------------------------------ #
-    #  STEP 1 & 2 — PREPROCESSING
-    # ------------------------------------------------------------------ #
-    banner("PREPROCESSING")
+    # Step 1: Data Cleaning
+    df = run_data_cleaning(filepath)
 
-    df = load_and_clean(filepath)
-    df, dropped = drop_correlated(df)
-    print(f"Loaded : {df.shape[0]} rows, {df.shape[1]} columns")
-    print(f"Dropped {len(dropped)} collinear features: {dropped}")
+    # Step 2: EDA
+    run_eda(df)
 
-    # Classification preparation
-    X_train_c, X_test_c, y_train_c, y_test_c, scaler_c, median_val = \
-        prepare_classification(df)
-    print(f"Classification threshold (median shares): {median_val:.0f}")
-    print(f"Train size: {len(X_train_c)} | Test size: {len(X_test_c)}")
+    # ================================================================== #
+    #  PHASE 2: FEATURE ENGINEERING (BEFORE any model training)
+    # ================================================================== #
+    print("\n\n" + "#" * 70)
+    print("#  PHASE 2: FEATURE ENGINEERING")
+    print("#  (This happens BEFORE any model training)")
+    print("#" * 70)
 
-    # Regression preparation
-    X_train_r, X_test_r, y_train_r, y_test_r, scaler_r = \
-        prepare_regression(df)
-    print(f"Regression train size: {len(X_train_r)} | Test size: {len(X_test_r)}")
+    # Step 3: Feature Selection (CRITICAL - Professor's Feedback #8)
+    selected_features, df_reduced, n_selected, df_after_corr = run_feature_selection(df)
 
-    # ------------------------------------------------------------------ #
-    #  STEP 1b — POST-PREPROCESSING EDA (before/after comparison plots)
-    # ------------------------------------------------------------------ #
-    banner("POST-PREPROCESSING EDA — BEFORE vs AFTER")
-    run_post_preprocessing_eda(df_raw, df)
+    # Step 4: Dimensionality Reduction (on selected features only)
+    run_dimensionality_reduction(df_reduced, selected_features)
 
-    # ------------------------------------------------------------------ #
-    #  STEP 3 — CLASSIFICATION
-    # ------------------------------------------------------------------ #
-    banner("CLASSIFICATION")
-    clf_models = run_classification(X_train_c, X_test_c, y_train_c, y_test_c)
+    # ================================================================== #
+    #  PHASE 3: TASK EXECUTION (6 Named Tasks)
+    # ================================================================== #
+    print("\n\n" + "#" * 70)
+    print("#  PHASE 3: TASK EXECUTION (6 Named Tasks)")
+    print("#  Each task clearly states: Name, Type, Input, Output")
+    print("#  Supervised tasks show: Before/After Preprocessing results")
+    print("#" * 70)
 
-    # ------------------------------------------------------------------ #
-    #  STEP 4 — REGRESSION
-    # ------------------------------------------------------------------ #
-    banner("REGRESSION")
-    reg_models = run_regression(X_train_r, X_test_r, y_train_r, y_test_r)
+    # Prepare data splits using selected features
+    splits = prepare_splits(df_reduced, selected_features)
 
-    # ------------------------------------------------------------------ #
-    #  STEP 5 — CLUSTERING
-    # ------------------------------------------------------------------ #
-    banner("CLUSTERING")
-    km_labels, db_labels = run_clustering(df)
+    # TASK 1: Predicting Whether a News Article Will Be Popular
+    task1_results = run_task1_popularity_classification(splits)
 
-    # ------------------------------------------------------------------ #
-    #  STEP 6 — ASSOCIATION RULES
-    # ------------------------------------------------------------------ #
-    banner("ASSOCIATION RULES")
-    rules = run_association_rules(df)
+    # TASK 2: Predicting the Number of Shares
+    task2_results = run_task2_shares_regression(splits)
 
-    # ------------------------------------------------------------------ #
-    #  STEP 7 — DIMENSIONALITY REDUCTION
-    # ------------------------------------------------------------------ #
-    banner("DIMENSIONALITY REDUCTION")
-    X_pca = run_dimensionality_reduction(df)
+    # TASK 3: Discovering Natural Groupings of News Articles
+    task3_km_labels, task3_db_labels = run_task3_clustering(
+        df_reduced, selected_features
+    )
 
-    # ------------------------------------------------------------------ #
-    #  STEP 8 — TEMPORAL ANALYSIS
-    # ------------------------------------------------------------------ #
-    banner("TEMPORAL ANALYSIS")
-    run_temporal_analysis(df)
+    # TASK 4: Identifying Content Patterns for High Engagement
+    task4_rules = run_task4_association_rules(df_after_corr)
 
-    # ------------------------------------------------------------------ #
-    #  STEP 9 — FEATURE IMPORTANCE
-    # ------------------------------------------------------------------ #
-    banner("FEATURE IMPORTANCE")
-    run_feature_importance(df)
+    # TASK 5: Optimizing Article Formatting and Media Usage
+    task5_results = run_task5_formatting_optimization(df_after_corr)
 
-    # ------------------------------------------------------------------ #
-    #  STEP 10 — SPARK PIPELINE
-    # ------------------------------------------------------------------ #
-    banner("SPARK PIPELINE")
+    # TASK 6: Recommending the Optimal Publication Window
+    task6_results = run_task6_publication_window(df_after_corr)
+
+    # ================================================================== #
+    #  PHASE 4: SCALABILITY
+    # ================================================================== #
+    print("\n\n" + "#" * 70)
+    print("#  PHASE 4: SCALABILITY DEMONSTRATION")
+    print("#" * 70)
+
     spark_results = run_spark_pipeline(filepath)
-    if spark_results:
-        print(f"\nSpark Accuracy : {spark_results['accuracy']:.4f}")
-        print(f"Spark ROC AUC  : {spark_results['roc_auc']:.4f}")
 
-    # ------------------------------------------------------------------ #
-    #  STEP 11 — ML PIPELINE COMPARISON (Before vs After Preprocessing)
-    # ------------------------------------------------------------------ #
-    banner("ML PIPELINE COMPARISON")
+    # ================================================================== #
+    #  SUMMARY
+    # ================================================================== #
+    print("\n\n" + "#" * 70)
+    print("#  ALL TASKS COMPLETE - SUMMARY")
+    print("#" * 70)
 
-    # Reload clean data (without the earlier drop_correlated, because the
-    # comparison module applies its own preprocessing pipeline internally)
-    df_clean = load_and_clean(filepath)
-    comparison_results = run_comparison_experiment(df_clean)
+    print(f"""
+  Pipeline Summary:
+  ─────────────────
+  Phase 1: Data Preparation
+    - Data cleaning: {df.shape[0]} rows, {df.shape[1]} columns
+    - EDA: 6 visualizations saved
 
-    # Generate all comparison visualizations
-    run_comparison_visualizations(comparison_results)
+  Phase 2: Feature Engineering
+    - Feature selection: {n_selected} features selected (data-driven)
+    - Dimensionality reduction: PCA + t-SNE on selected features
 
-    # ------------------------------------------------------------------ #
-    #  DONE
-    # ------------------------------------------------------------------ #
-    banner("ALL TASKS COMPLETE")
-    print("  All figures saved to figures/")
-    print("  All CSV results saved to results/")
-    print("=" * 60)
+  Phase 3: 6 Named Tasks
+    - Task 1: Popularity Classification    (Best: {task1_results['best_model_name']})
+    - Task 2: Shares Regression            (Best: {task2_results['best_model_name']})
+    - Task 3: Article Clustering           (K-Means + DBSCAN)
+    - Task 4: Engagement Patterns          ({len(task4_rules)} rules found)
+    - Task 5: Formatting Optimization      (Ridge/Lasso/RF/GB analysis)
+    - Task 6: Publication Window           (Best: {task6_results['best_model'] if task6_results else 'N/A'})
+
+  Phase 4: Scalability
+    - Spark Pipeline: {'Completed' if spark_results else 'Skipped (Java not available)'}
+
+  All figures saved to: figures/
+  All CSV results saved to: results/
+""")
 
 
 if __name__ == "__main__":
