@@ -1,8 +1,8 @@
 Model,RMSE,MAE,R2,Train_Time_s
-Linear Regression,0.874,0.6438,0.125,0.021
-Ridge Regression,0.8739,0.6439,0.1251,0.004
-Lasso Regression,0.8771,0.6486,0.1186,0.022
-Decision Tree Regressor,1.2453,0.9144,-0.7764,0.797
-Random Forest Regressor,0.8654,0.6418,0.1421,10.559
-Gradient Boosting Regressor,0.8574,0.63,0.1578,13.348
-SVR,0.8878,0.6417,0.0972,5.659
+Linear Regression,0.874,0.6438,0.125,0.035
+Ridge Regression,0.8739,0.6439,0.1251,0.012
+Lasso Regression,0.8771,0.6486,0.1186,0.024
+Decision Tree Regressor,1.2453,0.9144,-0.7764,0.783
+Random Forest Regressor,0.8654,0.6418,0.1421,6.323
+Gradient Boosting Regressor,0.8574,0.63,0.1578,13.253
+SVR,0.8878,0.6417,0.0972,5.52
