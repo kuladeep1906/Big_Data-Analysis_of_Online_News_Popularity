@@ -1,11 +1,5 @@
-"""
-Association Rule Mining Task Module (Phase 3)
-==============================================
-TASK 4: Identifying Content Patterns Associated with High Engagement
-  - Type: Unsupervised - Association Rule Mining
-  - Input: Binary feature indicators (weekend, channel type, high/low polarity, etc.)
-  - Output: Association rules with support, confidence, lift
-"""
+
+#TASK 4: Identifying Content Patterns Associated with High Engagement - Association Rule Mining
 
 import os
 import pandas as pd
@@ -28,11 +22,7 @@ def _save(fig, filename):
 
 
 def build_binary_matrix(df, target='shares'):
-    """
-    Build a boolean DataFrame of binary indicator columns + binarized target.
-    Binary columns (0/1) are used as-is.
-    Target is binarized using the median.
-    """
+    
     binary_cols = [c for c in df.columns if c != target and
                    df[c].dropna().isin([0, 1]).all()]
 
@@ -52,22 +42,12 @@ def build_binary_matrix(df, target='shares'):
 
 
 def run_task4_association_rules(df_full, target='shares'):
-    """
-    TASK 4: Identifying Content Patterns Associated with High Engagement
-    Type: Unsupervised - Association Rule Mining
-    """
+  
     # Count binary columns for display
     binary_cols = [c for c in df_full.columns if c != target and
                    df_full[c].dropna().isin([0, 1]).all()]
 
-    print("\n" + "=" * 70)
     print("  TASK 4: Identifying Content Patterns Associated with High Engagement")
-    print("  Real-World Question: What combinations of features tend to appear")
-    print("    together in high-share articles?")
-    print("  Type: Unsupervised - Association Rule Mining")
-    print(f"  Input: {len(binary_cols)} binary feature indicators + binarized target")
-    print("  Output: Association rules with support, confidence, lift")
-    print("=" * 70)
 
     df_bin = build_binary_matrix(df_full, target=target)
     if df_bin.empty:
@@ -153,6 +133,5 @@ def run_task4_association_rules(df_full, target='shares'):
         print("\n     No association rules found above the thresholds.")
 
     print("\n  TASK 4 COMPLETE")
-    print("=" * 70)
 
     return rules

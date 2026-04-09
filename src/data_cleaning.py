@@ -1,16 +1,5 @@
-"""
-Data Cleaning Module (Phase 1, Step 1)
-=======================================
-Explicit, verbose data cleaning with full visibility into every step.
-Professor's Feedback #1: "It's not clear if we used data cleaning or not."
 
-This module prints:
-  - Dataset shape before/after
-  - Missing value counts
-  - Duplicate row counts
-  - Outlier detection stats
-  - Dropped columns and reasons
-"""
+# Data Cleaning Module
 
 import pandas as pd
 import numpy as np
@@ -62,7 +51,6 @@ def report_duplicates(df):
 
 
 def drop_non_predictive_columns(df):
-    """Drop url and timedelta columns (not useful for prediction)."""
     _banner("Dropping Non-Predictive Columns")
     dropped = []
     for col in ['url', 'timedelta']:
@@ -78,7 +66,7 @@ def drop_non_predictive_columns(df):
 
 
 def report_outliers(df, target='shares'):
-    """Report outlier statistics for the target variable using IQR method."""
+    """Report outlier statistics for target variable using IQR"""
     _banner(f"Outlier Analysis on '{target}'")
 
     if target not in df.columns:
@@ -120,17 +108,10 @@ def report_data_types(df):
 
 
 def run_data_cleaning(filepath, target='shares'):
-    """
-    Full data cleaning pipeline with complete visibility.
+    
+   # Full data cleaning pipeline with complete visibility.
 
-    Returns
-    -------
-    df : pd.DataFrame
-        Cleaned dataset ready for EDA and modeling.
-    """
-    print("=" * 70)
     print("  PHASE 1, STEP 1: DATA CLEANING")
-    print("=" * 70)
 
     # Load
     df = load_raw_data(filepath)

@@ -1,29 +1,15 @@
-"""
-PySpark Scalability Demonstration (Phase 4)
-============================================
-Demonstrates that our ML pipeline can scale to large datasets
-using Apache Spark's distributed computing framework.
-
-Pipeline: VectorAssembler -> StandardScaler -> Random Forest Classifier
-"""
+# PySpark Scalability Demonstration
 
 import sys
 import os
 
 FIGURES_DIR = "figures"
 
-
 def run_spark_pipeline(filepath):
-    """
-    Demonstrate distributed ML pipeline with PySpark.
-    Mirrors Task 1 (classification) using Spark's ML library.
-    """
-    print("\n" + "=" * 70)
-    print("  PHASE 4: SPARK SCALABILITY DEMONSTRATION")
-    print("  Demonstrates distributed ML pipeline with PySpark")
-    print("=" * 70)
 
-    # Patch JVM flags BEFORE PySpark starts
+    print("  PHASE 4: SPARK SCALABILITY DEMONSTRATION")
+
+    # Patch JVM flags
     _java_opens = (
         "--add-opens=java.base/javax.security.auth=ALL-UNNAMED "
         "--add-opens=java.base/java.lang=ALL-UNNAMED "
@@ -125,15 +111,11 @@ def run_spark_pipeline(filepath):
         auc_val = binary_eval.evaluate(predictions)
         accuracy = multi_eval.evaluate(predictions)
 
-        print(f"\n  --- Spark Random Forest Results ---")
+        print(f"\n  Spark Random Forest Results")
         print(f"  Accuracy : {accuracy:.4f}")
         print(f"  ROC AUC  : {auc_val:.4f}")
-        print("\n  These results closely match the scikit-learn Random Forest,")
-        print("  demonstrating that the Spark pipeline produces equivalent results")
-        print("  while being designed to scale to millions of rows across a cluster.")
-
         print("\n  SPARK PIPELINE COMPLETE")
-        print("=" * 70)
+
 
         return {'accuracy': accuracy, 'roc_auc': auc_val}
 

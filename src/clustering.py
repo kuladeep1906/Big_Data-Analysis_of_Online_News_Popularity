@@ -1,11 +1,4 @@
-"""
-Clustering Task Module (Phase 3)
-=================================
-TASK 3: Discovering Natural Groupings of News Articles
-  - Type: Unsupervised - Clustering
-  - Input: Top N selected features (scaled)
-  - Output: Cluster labels (K-Means, DBSCAN)
-"""
+# TASK 3: Discovering Natural Groupings of News Articles - Clustering
 
 import os
 import numpy as np
@@ -30,7 +23,7 @@ def _save(fig, filename):
 
 
 def find_optimal_k(X, k_range=range(2, 11)):
-    """Run K-Means for different k values and return inertia + silhouette scores."""
+    """Run K-Means for different k values and"""
     inertias, sil_scores = [], []
     for k in k_range:
         km = KMeans(n_clusters=k, random_state=42, n_init=10)
@@ -92,7 +85,7 @@ def profile_clusters(df_reduced, labels, selected_features, target='shares'):
         print(f"       Mean shares: {cluster_data['shares'].mean():.0f}")
         print(f"       Median shares: {cluster_data['shares'].median():.0f}")
 
-        # Show top 5 distinguishing features (highest mean relative to overall)
+        # Show top 5 distinguishing features
         overall_mean = df_temp[selected_features].mean()
         cluster_mean = cluster_data[selected_features].mean()
         ratio = (cluster_mean / (overall_mean + 1e-10)).sort_values(ascending=False)
@@ -102,25 +95,15 @@ def profile_clusters(df_reduced, labels, selected_features, target='shares'):
 
 
 def run_task3_clustering(df_reduced, selected_features, target='shares'):
-    """
-    TASK 3: Discovering Natural Groupings of News Articles
-    Type: Unsupervised - Clustering
-    """
     n_features = len(selected_features)
 
-    print("\n" + "=" * 70)
     print("  TASK 3: Discovering Natural Groupings of News Articles")
-    print("  Real-World Question: Are there distinct types of articles in the dataset?")
-    print("  Type: Unsupervised - Clustering")
-    print(f"  Input: {n_features} selected features (scaled)")
-    print("  Output: Cluster labels (K-Means, DBSCAN)")
-    print("=" * 70)
 
     X = df_reduced[selected_features]
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
 
-    # ── Elbow Method ──
+    # Elbow Method
     print("\n  Running elbow method (k=2..10)...")
     k_range, inertias, sil_scores = find_optimal_k(X_scaled)
     plot_elbow(k_range, inertias, sil_scores)
@@ -128,7 +111,7 @@ def run_task3_clustering(df_reduced, selected_features, target='shares'):
     best_k = k_range[np.argmax(sil_scores)]
     print(f"\n     Best k by silhouette: {best_k}")
 
-    # ── K-Means with best k ──
+    #  K-Means with best k 
     km = KMeans(n_clusters=best_k, random_state=42, n_init=10)
     km_labels = km.fit_predict(X_scaled)
     km_sil = silhouette_score(X_scaled, km_labels, sample_size=5000)
@@ -141,7 +124,7 @@ def run_task3_clustering(df_reduced, selected_features, target='shares'):
     # Profile clusters
     profile_clusters(df_reduced, km_labels, selected_features, target)
 
-    # ── DBSCAN ──
+    #  DBSCAN
     print("\n  Running DBSCAN...")
     db = DBSCAN(eps=3.0, min_samples=10)
     db_labels = db.fit_predict(X_scaled)
@@ -161,6 +144,6 @@ def run_task3_clustering(df_reduced, selected_features, target='shares'):
 
     print(f"\n     Best Clustering Method: K-Means (k={best_k}, Silhouette={km_sil:.4f})")
     print("\n  TASK 3 COMPLETE")
-    print("=" * 70)
+
 
     return km_labels, db_labels

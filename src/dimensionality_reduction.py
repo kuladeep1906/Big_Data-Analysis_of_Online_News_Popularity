@@ -1,14 +1,4 @@
-"""
-Dimensionality Reduction Module (Phase 2, Step 4)
-==================================================
-Professor's Feedback #8: Apply PCA/t-SNE AFTER feature selection,
-on the selected N features only (NOT all 58).
-
-This module:
-  - PCA with explained variance analysis on selected features
-  - t-SNE for 2D visualization on selected features
-  - 2D scatter plots colored by popularity class
-"""
+# Dimensionality Reduction
 
 import os
 import numpy as np
@@ -78,7 +68,6 @@ def run_pca_analysis(X_scaled, labels, n_features):
 
 
 def run_tsne_analysis(X_scaled, labels, perplexity=30, sample_size=5000):
-    """Run t-SNE on a sample and plot 2D scatter."""
     # t-SNE is slow on large datasets, so sample
     if len(X_scaled) > sample_size:
         idx = np.random.RandomState(42).choice(len(X_scaled), sample_size, replace=False)
@@ -108,24 +97,12 @@ def run_tsne_analysis(X_scaled, labels, perplexity=30, sample_size=5000):
 
 
 def run_dimensionality_reduction(df_reduced, selected_features, target='shares'):
-    """
-    Full dimensionality reduction pipeline on selected features only.
-
-    Parameters
-    ----------
-    df_reduced : pd.DataFrame
-        DataFrame with selected features + target column.
-    selected_features : list of str
-        List of selected feature names.
-    target : str
-        Target column name.
-    """
+    
+   # Full dimensionality reduction pipeline on selected features only.
     n_features = len(selected_features)
 
-    print("=" * 70)
     print("  PHASE 2, STEP 4: DIMENSIONALITY REDUCTION (PCA + t-SNE)")
     print(f"  Applied on {n_features} SELECTED features (NOT all original features)")
-    print("=" * 70)
 
     X = df_reduced[selected_features]
     median_val = df_reduced[target].median()
@@ -141,6 +118,4 @@ def run_dimensionality_reduction(df_reduced, selected_features, target='shares')
     X_tsne = run_tsne_analysis(X_scaled, labels)
 
     print("\n  Dimensionality reduction complete.")
-    print("=" * 70)
-
     return X_pca

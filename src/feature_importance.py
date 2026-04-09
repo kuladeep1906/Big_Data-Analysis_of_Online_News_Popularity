@@ -1,17 +1,4 @@
-"""
-Preliminary Feature Analysis & Selection Module (Phase 2, Step 3)
-=================================================================
-Professor's Feedback #8 (VERY IMPORTANT):
-  "Do preliminary analysis, identify the most important features,
-   and THEN do PCA or t-SNE."
-
-This module:
-  1. Computes correlation analysis and drops highly correlated feature pairs
-  2. Trains Random Forest and ranks features by Gini importance
-  3. Selects top N features using cumulative importance threshold (90%)
-  4. Prints selected features clearly and visibly
-  5. Returns the selected feature list for all downstream tasks
-"""
+# Preliminary Feature Analysis & Selection Module 
 
 import os
 import numpy as np
@@ -28,7 +15,6 @@ from sklearn.model_selection import train_test_split
 FIGURES_DIR = "figures"
 SEED = 42
 
-
 def _save(fig, filename):
     os.makedirs(FIGURES_DIR, exist_ok=True)
     path = os.path.join(FIGURES_DIR, filename)
@@ -38,10 +24,8 @@ def _save(fig, filename):
 
 
 def correlation_analysis(df, target='shares', threshold=0.85):
-    """
-    Step 1: Remove one feature from each highly correlated pair.
-    Returns the DataFrame with correlated features dropped.
-    """
+  
+   #  Step 1: Remove one feature from each highly correlated pair.
     print("\n  >> Step 1: Correlation Analysis")
     print(f"     Threshold: |r| > {threshold}")
 
@@ -82,10 +66,8 @@ def correlation_analysis(df, target='shares', threshold=0.85):
 
 
 def random_forest_importance(df, target='shares'):
-    """
-    Step 2: Train Random Forest and compute Gini importance.
-    Returns sorted feature names and importance scores.
-    """
+    
+   #  Step 2: Train Random Forest and compute Gini importance.
     print("\n  >> Step 2: Random Forest Feature Importance (Gini)")
 
     X = df.drop(columns=[target], errors='ignore')
@@ -126,12 +108,9 @@ def random_forest_importance(df, target='shares'):
 
 
 def select_top_features(sorted_features, sorted_importances, cumulative_threshold=0.90):
-    """
-    Step 3: Select top N features using cumulative importance threshold.
-    N is data-driven, not hardcoded.
-    """
+    
+    # Step 3: Select top N features using cumulative importance threshold.
     print(f"\n  >> Step 3: Feature Selection (cumulative importance >= {cumulative_threshold:.0%})")
-
     cumulative = np.cumsum(sorted_importances)
     n_selected = int(np.argmax(cumulative >= cumulative_threshold) + 1)
 
@@ -143,13 +122,9 @@ def select_top_features(sorted_features, sorted_importances, cumulative_threshol
     total_importance = selected_importances.sum()
 
     print(f"\n     *** SELECTED {n_selected} FEATURES (covering {total_importance:.1%} of total importance) ***")
-    print(f"     {'─'*60}")
     for i, (feat, imp) in enumerate(zip(selected_features, selected_importances), 1):
         print(f"       {i:>2}. {feat:<45s} {imp:.6f}")
-    print(f"     {'─'*60}")
-
     return selected_features, n_selected
-
 
 def plot_feature_importance(sorted_features, sorted_importances, n_selected):
     """Plot feature importance with selected features highlighted."""
@@ -240,22 +215,10 @@ def compute_permutation_importance(rf_model, df, target='shares', top_n=20):
 
 
 def run_feature_selection(df, target='shares'):
-    """
-    Full preliminary feature analysis and selection pipeline.
 
-    Returns
-    -------
-    selected_features : list of str
-        Names of the selected top features.
-    df_reduced : pd.DataFrame
-        DataFrame with only selected features + target.
-    n_selected : int
-        Number of selected features.
-    """
-    print("=" * 70)
+  #  Full preliminary feature analysis and selection pipeline.
+
     print("  PHASE 2, STEP 3: PRELIMINARY FEATURE ANALYSIS & SELECTION")
-    print("  *** THIS IS A CRITICAL STEP (Professor's Feedback #8) ***")
-    print("=" * 70)
 
     # Step 1: Correlation analysis
     df, dropped_corr = correlation_analysis(df, target, threshold=0.85)
@@ -263,7 +226,7 @@ def run_feature_selection(df, target='shares'):
     # Step 2: Random Forest importance
     sorted_features, sorted_importances, rf_model = random_forest_importance(df, target)
 
-    # Step 3: Select top N (data-driven)
+    # Step 3: Select top N 
     selected_features, n_selected = select_top_features(
         sorted_features, sorted_importances, cumulative_threshold=0.90
     )
@@ -283,6 +246,5 @@ def run_feature_selection(df, target='shares'):
     print(f"     After correlation removal: {len(df.columns) - 1 - len(dropped_corr)}")
     print(f"     Selected features: {n_selected}")
     print(f"     Reduced DataFrame shape: {df_reduced.shape}")
-    print("=" * 70)
 
     return selected_features, df_reduced, n_selected, df

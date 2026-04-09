@@ -1,14 +1,4 @@
-"""
-Preprocessing Module
-====================
-Prepare data splits for classification and regression tasks.
-Professor's Feedback #12: "Specify what is before and after model training."
-
-This module provides:
-  - Raw (before preprocessing) splits: only imputation, no scaling
-  - Preprocessed (after preprocessing) splits: imputation + scaling
-  - Both use the SELECTED features from Phase 2
-"""
+#Preprocessing
 
 import numpy as np
 import pandas as pd
@@ -18,20 +8,9 @@ from sklearn.impute import SimpleImputer
 
 SEED = 42
 
-
 def prepare_splits(df, selected_features, target='shares', test_size=0.2):
-    """
-    Prepare train/test splits for both classification and regression.
+    #Prepare train/test splits for both classification and regression.
 
-    Returns a dict with raw (before preprocessing) and preprocessed (after) splits:
-      - X_train_raw, X_test_raw: imputed only (no scaling)
-      - X_train_proc, X_test_proc: imputed + scaled
-      - y_train_clf, y_test_clf: binary labels
-      - y_train_reg, y_test_reg: log1p(shares)
-      - median_val: the threshold used for classification
-      - scaler: the fitted StandardScaler
-      - feature_names: list of feature names used
-    """
     X = df[selected_features].copy()
     y_shares = df[target].copy()
 
@@ -42,7 +21,7 @@ def prepare_splits(df, selected_features, target='shares', test_size=0.2):
     # Regression target: log transform
     y_reg = np.log1p(y_shares)
 
-    # Single train/test split (same indices for fair comparison)
+    # Single train/test split
     X_train, X_test, y_train_clf, y_test_clf = train_test_split(
         X, y_clf, test_size=test_size, random_state=SEED, stratify=y_clf
     )
@@ -50,7 +29,7 @@ def prepare_splits(df, selected_features, target='shares', test_size=0.2):
     y_train_reg = y_reg.loc[X_train.index]
     y_test_reg = y_reg.loc[X_test.index]
 
-    # --- BEFORE preprocessing: impute only ---
+    # BEFORE preprocessing
     imputer = SimpleImputer(strategy='median')
     X_train_raw = pd.DataFrame(
         imputer.fit_transform(X_train),
@@ -61,7 +40,7 @@ def prepare_splits(df, selected_features, target='shares', test_size=0.2):
         columns=selected_features, index=X_test.index
     )
 
-    # --- AFTER preprocessing: impute + scale ---
+    # AFTER preprocessing
     scaler = StandardScaler()
     X_train_proc = pd.DataFrame(
         scaler.fit_transform(X_train_raw),

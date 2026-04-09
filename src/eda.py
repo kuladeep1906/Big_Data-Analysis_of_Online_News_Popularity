@@ -1,17 +1,4 @@
-"""
-Exploratory Data Analysis (EDA) Module (Phase 1, Step 2)
-========================================================
-Preliminary analysis of the cleaned dataset.
-
-Outputs:
-  - ANALYSIS table: Range, Mean, Mode, Std Dev, Median for every column
-  - fig1_hist_shares.png        - Histogram of shares
-  - fig2_boxplot_shares.png     - Box plot of shares
-  - fig3_correlation_heatmap.png - Correlation heatmap (top 20 features by variance)
-  - fig4_scatter_plot.png       - Scatter: n_tokens_content vs shares
-  - fig5_bar_chart.png          - Average shares by weekday
-  - exp_fig1_shares_vs_log_shares.png - raw vs log-transformed target
-"""
+# Exploratory Data Analysis (EDA) 
 
 import os
 import numpy as np
@@ -33,7 +20,7 @@ def _save(fig, filename):
 
 
 def compute_metrics(df):
-    """Compute Range, Mean, Mode, Std, and Median for every column."""
+    """Compute Range, Mean, Mode, Std, and Median."""
     metrics_dict = {}
     for col in df.columns:
         col_data = df[col]
@@ -60,7 +47,7 @@ def compute_metrics(df):
 
 
 def make_eda_plots(df):
-    """Generate and save the 5 standard EDA plots + log-transform comparison."""
+    """Generate and save the 5 standard EDA plots + log-transform"""
     sns.set_style("whitegrid")
     target_col = 'shares'
 
@@ -174,11 +161,8 @@ def make_eda_plots(df):
 
 
 def run_eda(df):
-    """Run the full EDA: print the ANALYSIS table + save plots."""
-    print("=" * 70)
     print("  PHASE 1, STEP 2: EXPLORATORY DATA ANALYSIS (EDA)")
-    print("=" * 70)
-
+  
     # Analysis table
     print("\n  >> Statistical Summary Table")
     metrics_df = compute_metrics(df)

@@ -1,22 +1,8 @@
 """
-Classification Tasks Module (Phase 3)
-======================================
-TASK 1: Predicting Whether a News Article Will Be Popular
-  - Type: Supervised - Binary Classification
-  - Input: Top N selected features
-  - Output: Popular (1) / Unpopular (0) based on median shares
+Classification Tasks Module
 
+TASK 1: Predicting Whether a News Article Will Be Popular - Classification
 TASK 6: Recommending the Optimal Publication Window (Weekday vs. Weekend)
-  - Type: Supervised - Binary Classification
-  - Input: NLP features + sentiment + content channels
-  - Output: Publish on Weekday (0) / Publish on Weekend (1)
-
-Professor's Feedback:
-  #2: "Regression is not a task" - we name real-world tasks
-  #4: "First identify which model is good"
-  #5: "Can be a group of models which can be good"
-  #7: "Clear on input and output"
-  #12: "Before model training and after model training"
 """
 
 import os
@@ -232,10 +218,7 @@ def plot_metric_heatmap(before_df, after_df, title, filename):
     plt.tight_layout()
     _save(fig, filename)
 
-
-# ══════════════════════════════════════════════════════════════════════
 #  TASK 1: Predicting Whether a News Article Will Be Popular
-# ══════════════════════════════════════════════════════════════════════
 
 def run_task1_popularity_classification(splits):
     """
@@ -244,15 +227,10 @@ def run_task1_popularity_classification(splits):
     """
     n_features = len(splits['feature_names'])
 
-    print("\n" + "=" * 70)
     print("  TASK 1: Predicting Whether a News Article Will Be Popular")
-    print("  Type: Supervised - Binary Classification")
-    print(f"  Input: {n_features} selected features (after feature selection)")
-    print(f"  Output: Binary label (Popular=1 if shares >= {splits['median_val']:.0f}, Unpopular=0)")
-    print("=" * 70)
-
-    # ── BEFORE Preprocessing ──
-    print("\n  --- Results BEFORE Preprocessing (raw features, no scaling) ---")
+  
+    # BEFORE Preprocessing
+    print("\n Results BEFORE Preprocessing")
     before_df, trained_before = evaluate_all_classifiers(
         get_classification_models(),
         splits['X_train_raw'], splits['X_test_raw'],
@@ -262,8 +240,8 @@ def run_task1_popularity_classification(splits):
     print(before_df.to_string())
     _save_csv(before_df, "task1_classification_before.csv")
 
-    # ── AFTER Preprocessing ──
-    print("\n  --- Results AFTER Preprocessing (scaled features) ---")
+    # AFTER Preprocessing
+    print("\n Results AFTER Preprocessing")
     after_df, trained_after = evaluate_all_classifiers(
         get_classification_models(),
         splits['X_train_proc'], splits['X_test_proc'],
@@ -273,25 +251,25 @@ def run_task1_popularity_classification(splits):
     print(after_df.to_string())
     _save_csv(after_df, "task1_classification_after.csv")
 
-    # ── Best Model ──
+    # Best Model
     best_before = before_df['Accuracy'].idxmax()
     best_after = after_df['Accuracy'].idxmax()
     print(f"\n     Best model BEFORE preprocessing: {best_before} (Acc: {before_df.loc[best_before, 'Accuracy']:.4f})")
     print(f"     Best model AFTER  preprocessing: {best_after} (Acc: {after_df.loc[best_after, 'Accuracy']:.4f})")
 
-    # ── Best Model Group ──
+    # Best Model Group
     print("\n     BEFORE preprocessing:")
     identify_best_model_group(before_df)
     print("\n     AFTER preprocessing:")
     best_group, _ = identify_best_model_group(after_df)
 
-    # ── Confusion Matrix for best model ──
+    # Confusion Matrix for best model
     best_model = trained_after[best_after]
     y_pred_best = best_model.predict(splits['X_test_proc'])
     plot_confusion_matrix(splits['y_test_clf'], y_pred_best, best_after,
                           'fig_task1_cm_best.png')
 
-    # ── ROC Curves ──
+    # ROC Curves
     plot_roc_curves(trained_before, splits['X_test_raw'], splits['y_test_clf'],
                     'Task 1: ROC Curves (Before Preprocessing)',
                     'fig_task1_roc_before.png')
@@ -299,23 +277,22 @@ def run_task1_popularity_classification(splits):
                     'Task 1: ROC Curves (After Preprocessing)',
                     'fig_task1_roc_after.png')
 
-    # ── Accuracy Comparison ──
+    # Accuracy Comparison
     plot_accuracy_comparison(before_df, after_df,
                              'Task 1: Classification Accuracy - Before vs After',
                              'fig_task1_accuracy_comparison.png')
 
-    # ── Metric Heatmap ──
+    # Metric Heatmap
     plot_metric_heatmap(before_df, after_df,
                         'Task 1: Metric Change After Preprocessing',
                         'fig_task1_heatmap.png')
 
-    # ── Detailed report for best model ──
+    # Detailed report for best model
     print(f"\n     Detailed Classification Report ({best_after}, After Preprocessing):")
     print(classification_report(splits['y_test_clf'], y_pred_best,
                                 target_names=['Unpopular', 'Popular']))
 
     print("  TASK 1 COMPLETE")
-    print("=" * 70)
 
     return {
         'before': before_df, 'after': after_df,
@@ -323,19 +300,10 @@ def run_task1_popularity_classification(splits):
         'best_model_name': best_after, 'best_group': best_group,
     }
 
-
-# ══════════════════════════════════════════════════════════════════════
 #  TASK 6: Recommending the Optimal Publication Window
-# ══════════════════════════════════════════════════════════════════════
 
 def run_task6_publication_window(df_full, target='shares'):
-    """
-    TASK 6: Recommending the Optimal Publication Window (Weekday vs. Weekend)
-    Type: Supervised - Binary Classification
 
-    Uses ONLY NLP + sentiment + channel features as input.
-    Target is is_weekend (0 = weekday, 1 = weekend).
-    """
     # Define input features (NLP, sentiment, channels only)
     nlp_features = [
         'global_subjectivity', 'global_sentiment_polarity',
@@ -354,18 +322,10 @@ def run_task6_publication_window(df_full, target='shares'):
     lda_features = ['LDA_00', 'LDA_01', 'LDA_02', 'LDA_03', 'LDA_04']
 
     input_features = nlp_features + channel_features + lda_features
-    # Only keep features that exist in the dataframe
     input_features = [f for f in input_features if f in df_full.columns]
 
-    print("\n" + "=" * 70)
     print("  TASK 6: Recommending the Optimal Publication Window")
-    print("  Real-World Question: Given the tone and topic of an article,")
-    print("    should it be published on a weekday or weekend?")
-    print("  Type: Supervised - Binary Classification")
-    print(f"  Input: {len(input_features)} NLP + sentiment + channel features")
-    print("  Output: Publish on Weekday (0) / Publish on Weekend (1)")
-    print("=" * 70)
-
+   
     if 'is_weekend' not in df_full.columns:
         print("  ERROR: 'is_weekend' column not found. Skipping Task 6.")
         return None
@@ -392,8 +352,6 @@ def run_task6_publication_window(df_full, target='shares'):
                                  columns=input_features, index=X_train.index)
     X_test_proc = pd.DataFrame(scaler.transform(X_test_raw),
                                 columns=input_features, index=X_test.index)
-
-    # Use fewer models for this task
     models = {
         "Logistic Regression": LogisticRegression(random_state=SEED, max_iter=1000),
         "Random Forest": RandomForestClassifier(n_estimators=100, random_state=SEED, n_jobs=-1),
@@ -401,16 +359,15 @@ def run_task6_publication_window(df_full, target='shares'):
         "SVM": SVC(random_state=SEED, probability=True, max_iter=5000),
     }
 
-    # ── BEFORE Preprocessing ──
-    print("\n  --- Results BEFORE Preprocessing ---")
+    # BEFORE Preprocessing
+    print("\n  Results BEFORE Preprocessing")
     before_df, trained_before = evaluate_all_classifiers(
         {k: v for k, v in models.items()},
         X_train_raw, X_test_raw, y_train, y_test, label="Before"
     )
     print(before_df.to_string())
 
-    # ── AFTER Preprocessing ──
-    # Need fresh model instances
+    # AFTER Preprocessing
     models_after = {
         "Logistic Regression": LogisticRegression(random_state=SEED, max_iter=1000),
         "Random Forest": RandomForestClassifier(n_estimators=100, random_state=SEED, n_jobs=-1),
@@ -418,18 +375,18 @@ def run_task6_publication_window(df_full, target='shares'):
         "SVM": SVC(random_state=SEED, probability=True, max_iter=5000),
     }
 
-    print("\n  --- Results AFTER Preprocessing ---")
+    print("\n Results AFTER Preprocessing")
     after_df, trained_after = evaluate_all_classifiers(
         models_after,
         X_train_proc, X_test_proc, y_train, y_test, label="After"
     )
     print(after_df.to_string())
 
-    # ── Best Model ──
+    # Best Model
     best_name = after_df['Accuracy'].idxmax()
     print(f"\n     Best model: {best_name} (Acc: {after_df.loc[best_name, 'Accuracy']:.4f})")
 
-    # ── Feature Importance for interpretation ──
+    # Feature Importance for interpretation
     rf = trained_after.get("Random Forest")
     if rf is not None:
         importances = rf.feature_importances_
@@ -454,7 +411,7 @@ def run_task6_publication_window(df_full, target='shares'):
         plt.tight_layout()
         _save(fig, 'fig_task6_feature_importance.png')
 
-    # ── ROC Curve ──
+    # ROC Curve
     plot_roc_curves(trained_after, X_test_proc, y_test,
                     'Task 6: ROC Curves - Publication Window',
                     'fig_task6_roc.png')
@@ -462,6 +419,4 @@ def run_task6_publication_window(df_full, target='shares'):
     _save_csv(after_df, "task6_publication_window.csv")
 
     print("\n  TASK 6 COMPLETE")
-    print("=" * 70)
-
     return {'before': before_df, 'after': after_df, 'best_model': best_name}

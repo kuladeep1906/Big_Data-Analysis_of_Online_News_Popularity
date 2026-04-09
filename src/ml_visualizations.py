@@ -1,17 +1,5 @@
-"""
-ML Visualizations Module
-========================
-Generate publication-quality figures for the before/after comparison experiment.
 
-Figures produced:
-  • ROC curves (before and after preprocessing)
-  • Bar chart comparing model accuracies (grouped before/after)
-  • Metric heatmaps for classification and regression
-  • Feature importance plot from Random Forest (after preprocessing)
-  • Learning curve for the best classifier
-
-All plots saved to figures/ at 200 DPI.
-"""
+# Figures for the before/after comparison.
 
 import os
 import numpy as np
@@ -27,21 +15,8 @@ FIGURES_DIR = "figures"
 def _ensure_dir():
     os.makedirs(FIGURES_DIR, exist_ok=True)
 
-
-# ──────────────────────────────────────────────────────────────
 #  1.  ROC CURVES
-# ──────────────────────────────────────────────────────────────
-
 def plot_roc_curves(trained_models, X_test, y_test, label="After Preprocessing"):
-    """
-    Overlay ROC curves for all classifiers on a single figure.
-
-    Parameters
-    ----------
-    trained_models : dict {name: fitted_model}
-    X_test, y_test : test data
-    label          : used in title and filename
-    """
     _ensure_dir()
     fig, ax = plt.subplots(figsize=(10, 8))
 
@@ -74,15 +49,8 @@ def plot_roc_curves(trained_models, X_test, y_test, label="After Preprocessing")
     plt.close()
     print(f"  Saved: {path}")
 
-
-# ──────────────────────────────────────────────────────────────
-#  2.  ACCURACY BAR CHART (grouped before / after)
-# ──────────────────────────────────────────────────────────────
-
+#  2.  ACCURACY BAR CHART 
 def plot_accuracy_comparison(clf_before, clf_after):
-    """
-    Grouped bar chart showing each model's accuracy before vs after preprocessing.
-    """
     _ensure_dir()
     models = clf_before.index.tolist()
     x = np.arange(len(models))
@@ -118,16 +86,9 @@ def plot_accuracy_comparison(clf_before, clf_after):
     plt.close()
     print(f"  Saved: {path}")
 
-
-# ──────────────────────────────────────────────────────────────
 #  3.  METRIC HEATMAP
-# ──────────────────────────────────────────────────────────────
 
 def plot_metric_heatmap(df_before, df_after, task="Classification"):
-    """
-    Heatmap showing metric improvement (Δ) across models.
-    Green = improvement, Red = degradation.
-    """
     _ensure_dir()
 
     if task == "Classification":
@@ -152,15 +113,9 @@ def plot_metric_heatmap(df_before, df_after, task="Classification"):
     print(f"  Saved: {path}")
 
 
-# ──────────────────────────────────────────────────────────────
-#  4.  FEATURE IMPORTANCE (Random Forest)
-# ──────────────────────────────────────────────────────────────
+# 4.  FEATURE IMPORTANCE
 
 def plot_rf_feature_importance(trained_models, feature_names, top_n=20):
-    """
-    Horizontal bar chart of the top-N most important features
-    from the Random Forest classifier (after preprocessing).
-    """
     _ensure_dir()
     rf = trained_models.get("Random Forest")
     if rf is None:
@@ -194,16 +149,9 @@ def plot_rf_feature_importance(trained_models, feature_names, top_n=20):
     for i, (feat, imp) in enumerate(zip(top_feats, top_imps), 1):
         print(f"    {i:>2}. {feat:<40s} {imp:.4f}")
 
-
-# ──────────────────────────────────────────────────────────────
 #  5.  LEARNING CURVE (best classifier)
-# ──────────────────────────────────────────────────────────────
 
 def plot_learning_curve(trained_models, X_train, y_train, clf_results):
-    """
-    Learning curve for the best-performing classifier (by accuracy).
-    Shows whether more training data would help.
-    """
     _ensure_dir()
 
     best_name = clf_results["Accuracy"].idxmax()
@@ -248,15 +196,8 @@ def plot_learning_curve(trained_models, X_train, y_train, clf_results):
     plt.close()
     print(f"  Saved: {path}")
 
-
-# ──────────────────────────────────────────────────────────────
-#  6.  REGRESSION BAR CHART (R² comparison)
-# ──────────────────────────────────────────────────────────────
-
+#  6.  REGRESSION BAR CHART - R² scores
 def plot_r2_comparison(reg_before, reg_after):
-    """
-    Grouped bar chart for R² scores before vs after preprocessing.
-    """
     _ensure_dir()
     models = reg_before.index.tolist()
     x = np.arange(len(models))
@@ -283,19 +224,11 @@ def plot_r2_comparison(reg_before, reg_after):
     plt.close()
     print(f"  Saved: {path}")
 
-
-# ──────────────────────────────────────────────────────────────
-#  MASTER VISUALISATION RUNNER
-# ──────────────────────────────────────────────────────────────
+#  VISUALISATION RUNNER
 
 def run_comparison_visualizations(results):
-    """
-    Generate all comparison visualizations from the experiment results dict.
-    """
-    print("\n" + "=" * 70)
     print("  GENERATING COMPARISON VISUALIZATIONS")
-    print("=" * 70)
-
+  
     # ROC curves — before and after
     plot_roc_curves(results["trained_clf_before"],
                     results["X_test_clf_before"], results["y_test_clf"],
@@ -320,8 +253,8 @@ def run_comparison_visualizations(results):
 
     # Learning curve for best classifier
     plot_learning_curve(results["trained_clf_after"],
-                        results["X_test_clf_after"],  # reuse for learning curve
+                        results["X_test_clf_after"], 
                         results["y_test_clf"],
                         results["clf_after"])
 
-    print("\n  ✓ All comparison visualizations saved to figures/")
+    print("\n  All comparison visualizations saved to figures/")

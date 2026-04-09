@@ -1,15 +1,8 @@
 """
-Regression Tasks Module (Phase 3)
-==================================
+Regression Tasks
 TASK 2: Predicting the Number of Shares an Article Will Receive
-  - Type: Supervised - Regression
-  - Input: Top N selected features
-  - Output: log(1 + shares) continuous value
 
 TASK 5: Optimizing Article Formatting and Media Usage for Maximum Reach
-  - Type: Supervised - Regression (focus on feature coefficients)
-  - Input: ONLY structural/formatting features
-  - Output: Expected shares (log scale)
 """
 
 import os
@@ -59,7 +52,6 @@ def _save_csv(df, filename):
 
 
 def get_regression_models():
-    """Return a dict of name -> regressor."""
     return {
         "Linear Regression":        LinearRegression(),
         "Ridge Regression":         Ridge(alpha=1.0, random_state=SEED),
@@ -72,7 +64,7 @@ def get_regression_models():
 
 
 def evaluate_all_regressors(models, X_train, X_test, y_train, y_test, label=""):
-    """Train and evaluate all regression models. Returns results DataFrame."""
+    """Train and evaluate all regression models."""
     rows = []
     trained = {}
 
@@ -109,7 +101,6 @@ def evaluate_all_regressors(models, X_train, X_test, y_train, y_test, label=""):
 
 
 def identify_best_model_group(results_df):
-    """Identify which group of models performs best on average R2."""
     group_scores = {}
     for group_name, model_names in MODEL_GROUPS.items():
         present = [m for m in model_names if m in results_df.index]
@@ -128,7 +119,7 @@ def identify_best_model_group(results_df):
 
 
 def plot_predicted_vs_actual(y_test, y_pred, name, filename):
-    """Save a predicted-vs-actual scatter plot (log scale)."""
+    """Save a predicted vs actual scatter plot."""
     fig, ax = plt.subplots(figsize=(8, 6))
     ax.scatter(y_test, y_pred, alpha=0.3, s=10, c='teal')
     mn, mx = min(y_test.min(), y_pred.min()), max(y_test.max(), y_pred.max())
@@ -143,7 +134,6 @@ def plot_predicted_vs_actual(y_test, y_pred, name, filename):
 
 
 def plot_r2_comparison(before_df, after_df, title, filename):
-    """Grouped bar chart for R2 scores before vs after."""
     models = before_df.index.tolist()
     x = np.arange(len(models))
     width = 0.35
@@ -166,7 +156,6 @@ def plot_r2_comparison(before_df, after_df, title, filename):
 
 
 def plot_metric_heatmap(before_df, after_df, title, filename):
-    """Heatmap of metric changes."""
     cols = ["RMSE_log", "MAE_log", "R2"]
     available = [c for c in cols if c in before_df.columns and c in after_df.columns]
     delta = after_df[available] - before_df[available]
@@ -179,27 +168,13 @@ def plot_metric_heatmap(before_df, after_df, title, filename):
     plt.tight_layout()
     _save(fig, filename)
 
-
-# ══════════════════════════════════════════════════════════════════════
 #  TASK 2: Predicting the Number of Shares
-# ══════════════════════════════════════════════════════════════════════
-
 def run_task2_shares_regression(splits):
-    """
-    TASK 2: Predicting the Number of Shares an Article Will Receive
-    Type: Supervised - Regression
-    """
     n_features = len(splits['feature_names'])
-
-    print("\n" + "=" * 70)
+    
     print("  TASK 2: Predicting the Number of Shares an Article Will Receive")
-    print("  Type: Supervised - Regression")
-    print(f"  Input: {n_features} selected features (after feature selection)")
-    print("  Output: log(1 + shares) continuous value")
-    print("=" * 70)
-
-    # ── BEFORE Preprocessing ──
-    print("\n  --- Results BEFORE Preprocessing (raw features, no scaling) ---")
+    # BEFORE Preprocessing
+    print("\n Results BEFORE Preprocessing")
     before_df, trained_before = evaluate_all_regressors(
         get_regression_models(),
         splits['X_train_raw'], splits['X_test_raw'],
@@ -209,8 +184,8 @@ def run_task2_shares_regression(splits):
     print(before_df.to_string())
     _save_csv(before_df, "task2_regression_before.csv")
 
-    # ── AFTER Preprocessing ──
-    print("\n  --- Results AFTER Preprocessing (scaled features) ---")
+    # AFTER Preprocessing
+    print("\n  Results AFTER Preprocessing")
     after_df, trained_after = evaluate_all_regressors(
         get_regression_models(),
         splits['X_train_proc'], splits['X_test_proc'],
@@ -220,72 +195,53 @@ def run_task2_shares_regression(splits):
     print(after_df.to_string())
     _save_csv(after_df, "task2_regression_after.csv")
 
-    # ── Best Model ──
+    # Best Model
     best_before = before_df['R2'].idxmax()
     best_after = after_df['R2'].idxmax()
     print(f"\n     Best model BEFORE preprocessing: {best_before} (R2: {before_df.loc[best_before, 'R2']:.4f})")
     print(f"     Best model AFTER  preprocessing: {best_after} (R2: {after_df.loc[best_after, 'R2']:.4f})")
 
-    # ── Best Model Group ──
+    # Best Model Group
     print("\n     BEFORE preprocessing:")
     identify_best_model_group(before_df)
     print("\n     AFTER preprocessing:")
     best_group, _ = identify_best_model_group(after_df)
 
-    # ── Predicted vs Actual for best model ──
+    # Predicted vs Actual for best model
     best_model = trained_after[best_after]
     y_pred_best = best_model.predict(splits['X_test_proc'])
     plot_predicted_vs_actual(splits['y_test_reg'], y_pred_best,
                              best_after, 'fig_task2_pred_vs_actual.png')
 
-    # ── R2 Comparison ──
+    # R2 Comparison
     plot_r2_comparison(before_df, after_df,
                        'Task 2: R2 Score - Before vs After',
                        'fig_task2_r2_comparison.png')
 
-    # ── Metric Heatmap ──
+    # Metric Heatmap 
     plot_metric_heatmap(before_df, after_df,
                         'Task 2: Metric Change After Preprocessing',
                         'fig_task2_heatmap.png')
 
     print("\n  TASK 2 COMPLETE")
-    print("=" * 70)
-
     return {
         'before': before_df, 'after': after_df,
         'trained_before': trained_before, 'trained_after': trained_after,
         'best_model_name': best_after, 'best_group': best_group,
     }
 
-
-# ══════════════════════════════════════════════════════════════════════
 #  TASK 5: Optimizing Article Formatting and Media Usage
-# ══════════════════════════════════════════════════════════════════════
 
 def run_task5_formatting_optimization(df_full, target='shares'):
-    """
-    TASK 5: Optimizing Article Formatting and Media Usage for Maximum Reach
-    Type: Supervised - Regression (focus on feature coefficients / partial dependence)
-
-    Uses ONLY structural/formatting features.
-    """
-    # Define formatting features
     formatting_features = [
         'n_tokens_title', 'n_tokens_content',
         'num_imgs', 'num_videos',
         'num_hrefs', 'num_self_hrefs',
     ]
-    # Keep only features present in the dataframe
     formatting_features = [f for f in formatting_features if f in df_full.columns]
 
-    print("\n" + "=" * 70)
     print("  TASK 5: Optimizing Article Formatting and Media Usage for Maximum Reach")
-    print("  Real-World Question: What is the optimal combination of text length,")
-    print("    links, and media to drive shares?")
-    print("  Type: Supervised - Regression (Feature Coefficients / Partial Dependence)")
-    print(f"  Input: {len(formatting_features)} structural features: {formatting_features}")
-    print("  Output: log(1 + shares) continuous value")
-    print("=" * 70)
+   
 
     X = df_full[formatting_features].copy()
     y = np.log1p(df_full[target])
@@ -308,7 +264,6 @@ def run_task5_formatting_optimization(df_full, target='shares'):
     X_test_scaled = pd.DataFrame(scaler.transform(X_test_imp),
                                   columns=formatting_features, index=X_test.index)
 
-    # Models — use both interpretable (Ridge, Lasso) and powerful (RF, GB)
     models = {
         "Ridge Regression": Ridge(alpha=1.0, random_state=SEED),
         "Lasso Regression": Lasso(alpha=0.01, random_state=SEED, max_iter=5000),
@@ -316,14 +271,14 @@ def run_task5_formatting_optimization(df_full, target='shares'):
         "Gradient Boosting Regressor": GradientBoostingRegressor(n_estimators=100, random_state=SEED),
     }
 
-    print("\n  --- Model Results (scaled features) ---")
+    print("\n  Model Results (scaled features)")
     results_df, trained = evaluate_all_regressors(
         models, X_train_scaled, X_test_scaled, y_train, y_test
     )
     print(results_df.to_string())
     _save_csv(results_df, "task5_formatting_results.csv")
 
-    # ── Interpretable Coefficients (Ridge) ──
+    # Interpretable Coefficients (Ridge)
     ridge = trained.get("Ridge Regression")
     if ridge is not None:
         print("\n     Ridge Regression Coefficients (Formatting Guidelines):")
@@ -334,7 +289,7 @@ def run_task5_formatting_optimization(df_full, target='shares'):
             direction = "increases" if coef > 0 else "decreases"
             print(f"     {feat:<25s} {coef:>12.4f}  1 std increase {direction} log(shares) by {abs(coef):.4f}")
 
-    # ── Lasso Coefficients ──
+    # Lasso Coefficients
     lasso = trained.get("Lasso Regression")
     if lasso is not None:
         print("\n     Lasso Regression Coefficients:")
@@ -343,7 +298,7 @@ def run_task5_formatting_optimization(df_full, target='shares'):
             status = "ZERO (dropped by Lasso)" if abs(coef) < 1e-6 else f"{coef:.4f}"
             print(f"       {feat:<25s}: {status}")
 
-    # ── RF Feature Importance ──
+    # RF Feature Importance
     rf = trained.get("Random Forest Regressor")
     if rf is not None:
         importances = rf.feature_importances_
@@ -368,12 +323,11 @@ def run_task5_formatting_optimization(df_full, target='shares'):
         plt.tight_layout()
         _save(fig, 'fig_task5_feature_importance.png')
 
-    # ── Partial Dependence (manual, for key features) ──
+    # Partial Dependence
     print("\n     Actionable Insights:")
     # Compute mean shares by feature bins
     for feat in ['num_imgs', 'num_videos', 'num_hrefs']:
         if feat in df_full.columns:
-            # Create bins
             col = df_full[feat]
             bins = [0, 1, 3, 5, 10, 20, col.max() + 1]
             labels = ['0', '1-3', '4-5', '6-10', '11-20', '20+']
@@ -384,6 +338,5 @@ def run_task5_formatting_optimization(df_full, target='shares'):
                 print(f"       {bin_label:>8s}: {avg:>10.0f} shares")
 
     print("\n  TASK 5 COMPLETE")
-    print("=" * 70)
 
     return {'results': results_df, 'trained': trained}
