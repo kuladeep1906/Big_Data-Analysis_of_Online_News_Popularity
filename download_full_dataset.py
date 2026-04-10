@@ -33,7 +33,7 @@ def download_full_dataset():
         # Combine features and target
         df = pd.concat([X, y], axis=1)
         
-        print(f"✅ Dataset loaded: {df.shape[0]} rows, {df.shape[1]} columns")
+        print(f"Dataset loaded: {df.shape[0]} rows, {df.shape[1]} columns")
         
         return df
     except ImportError:
@@ -62,7 +62,7 @@ def save_full_dataset(df, output_path):
     # Save to CSV
     print(f"Saving full dataset to {output_path}...")
     df.to_csv(output_path, index=False)
-    print(f"✅ Full dataset saved to: {output_path}")
+    print(f"Full dataset saved to: {output_path}")
     print(f"   Size: {df.shape[0]} rows, {df.shape[1]} columns")
     print(f"   File size: {os.path.getsize(output_path) / (1024*1024):.2f} MB")
 
@@ -88,7 +88,7 @@ def main():
     print()
     save_full_dataset(df, OUTPUT_FILE)
     print()
-    print("✅ Success! You can now run the analysis on the full dataset with:")
+    print(" Success! You can now run the analysis on the full dataset with:")
     print(f"  python report_1.py {OUTPUT_FILE}")
 
 
