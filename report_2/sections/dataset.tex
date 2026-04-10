@@ -1,0 +1,19 @@
+\section{Dataset Description}
+
+The dataset used in this project is the \textit{Online News Popularity} dataset from the UCI Machine Learning Repository \cite{fernandes2015dataset}. It contains information about online news articles published by Mashable and is widely used for studying engagement prediction and content analytics.
+
+The working dataset used in this report contains 39,644 rows and 59 columns. Each row represents a single news article, and the target variable is \texttt{shares}, which records the number of times the article was shared on social media. All variables are numeric, which makes the dataset suitable for a wide range of machine learning and data mining techniques.
+
+The features can be grouped into several meaningful categories:
+
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Content features:} title length, article length, token statistics, and lexical characteristics.
+    \item \textbf{Media and link features:} number of hyperlinks, self-references, images, and videos.
+    \item \textbf{Keyword statistics:} measures describing the popularity and distribution of article keywords.
+    \item \textbf{Topic features:} latent topic probabilities obtained through LDA-based representations.
+    \item \textbf{Sentiment features:} polarity, subjectivity, and positive/negative word ratios.
+    \item \textbf{Publication features:} weekday indicators and the weekend flag.
+    \item \textbf{Channel indicators:} binary variables describing the article channel, such as technology, entertainment, or business.
+\end{itemize}
+
+This dataset is well suited to the project because it supports multiple types of analysis \cite{han2011datamining}. It can be used for classification tasks such as identifying whether an article is popular, for regression tasks such as estimating the number of shares, and for exploratory tasks such as clustering and association rule mining. The diversity of the features also makes it possible to study both predictive performance and practical interpretation.

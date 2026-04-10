@@ -1,0 +1,46 @@
+\section{Discussion}
+
+\subsection{Model Group Comparison}
+
+Across Tasks 1 and 2, a clear pattern emerged in how different model families performed. This comparison addresses the professor's feedback to identify not just the best single model, but the best \textit{group} of models.
+
+\begin{table}[H]
+\centering
+\caption{Model group performance summary across supervised tasks}
+\begin{tabular}{llcc}
+\toprule
+\textbf{Model Group} & \textbf{Models} & \textbf{Task 1 Acc.} & \textbf{Task 2 $R^2$} \\
+\midrule
+Tree-based ensembles & RF, GB, AdaBoost & 0.64--0.65 & 0.13--0.14 \\
+Linear models & LogReg, Ridge, Lasso & 0.60--0.63 & 0.09--0.10 \\
+Distance-based & KNN, SVM, SVR & 0.51--0.59 & $<$0 to $-$7.27 \\
+Probabilistic & Naive Bayes & 0.50--0.52 & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent \textbf{Tree-based ensembles} (Random Forest, Gradient Boosting, AdaBoost) consistently outperformed all other model families. This indicates that article popularity is shaped by non-linear feature interactions that tree-based methods capture well \cite{breiman2001rf,biau2016rf}. \textbf{Linear models} provided a moderate baseline and benefited most from preprocessing (scaling). \textbf{Distance-based models} (KNN, SVM, SVR) were the weakest, particularly SVR which produced negative $R^2$ values before scaling, indicating sensitivity to feature magnitudes and the high-dimensional feature space. Naive Bayes performed poorly due to its independence assumption being violated by the correlated feature set.
+
+\subsection{Role of Preprocessing}
+
+Preprocessing (StandardScaler) had a differential impact depending on model type. Scale-sensitive models such as Logistic Regression, KNN, and SVM showed meaningful improvement after scaling. In contrast, tree-based models (Gradient Boosting, Random Forest) showed negligible changes because they are scale-invariant --- they split on feature thresholds regardless of magnitude. The slight accuracy decrease for Gradient Boosting after preprocessing (0.6483 to 0.6469) is expected and reflects minor floating-point shifts in split boundaries rather than a meaningful degradation.
+
+\subsection{Feature Engineering Impact}
+
+The preliminary feature selection stage improved both the organization and interpretability of the project by focusing the analysis on 29 informative variables selected through a data-driven process. Keyword statistics (\texttt{kw\_max\_avg}, \texttt{kw\_avg\_max}), self-reference measures, LDA topic probabilities, and sentiment-related features appeared repeatedly as the most important factors, indicating that article popularity depends on a mix of topic relevance, language characteristics, and prior contextual signals.
+
+\subsection{Exploratory Task Findings}
+
+The exploratory tasks provided useful support, even when their results were not especially strong in a predictive sense. Clustering showed that the dataset does not naturally separate into sharply distinct article types, which helps explain why supervised models are more suitable for this problem. The selection of $k=2$ as the optimal cluster count aligns with the binary popular/unpopular split used in Task~1, suggesting that this is the most natural division in the data. Association rule mining reinforced the idea that timing and topic matter, but also showed that only a limited number of rules lead to meaningful engagement-related interpretation.
+
+Task 5 added a practical layer to the project by isolating article formatting and media usage. While these structural variables alone had limited explanatory power ($R^2 \approx 0.06$ at best), they still offered useful directional insight into how article design may relate to engagement. This supports the idea that share performance is influenced not only by what an article is about, but also by how it is presented.
+
+Task 6 was the weakest task in the project, largely because of class imbalance (only 13\% of articles were published on weekends) and weak weekend recall. However, including it still adds value because it shows an honest boundary of what the data can and cannot support. In a complete analytics project, reporting a weak result is often as important as reporting a strong one.
+
+\subsection{Interpretation of Low $R^2$ in Task 2}
+
+The best $R^2$ value of 0.137 may appear low but is consistent with published research on this exact dataset. Stanford CS229 projects by Ren \& Yang (2015) and Johnson \& Weinberger (2016) reported similar $R^2$ values of approximately 10\% on the same UCI Mashable data. Predicting social media shares is fundamentally a human behavior problem where external factors (viral network effects, current events, platform algorithms) account for the majority of variance. In social science domains, $R^2$ values of 10--15\% are generally accepted when the predictors capture only content-level features.
+
+\subsection{Overall Structure}
+
+Overall, the report shows that a task-oriented structure provides a clearer and more meaningful way to present the project. Instead of appearing as a sequence of unrelated techniques, the analysis becomes a connected study built around real analytical questions \cite{bishop2006prml,han2011datamining}.

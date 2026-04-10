@@ -3,7 +3,7 @@
 
 This repository contains the complete analysis and machine learning pipeline for the Big Data course project using the UCI Online News Popularity dataset (ID: 332).
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # 1. Install Java 17 LTS (required for PySpark)
@@ -17,26 +17,48 @@ pip install -r requirements.txt
 
 # 3. Run the complete analysis pipeline
 python report_2_task.py data/full_dataset.csv
+
+# 4. Run on the ~500 sample subset (for quick testing / professor grading)
+python report_2_task.py data/subset.csv
 ```
+
+## How to Run
+
+```bash
+python report_2_task.py <location_of_data_file>
+```
+
+The script runs the entire task-oriented pipeline end-to-end and prints all results to the console. Figures are saved to `figures/` and CSV results to `results/`.
 
 ## Project Overview
 
-The UCI Online News Popularity dataset contains 39,644 online news articles published by Mashable with around 60 numeric features related to content, sentiment, topics, and publication timing. The target variable is `shares`, representing the number of times an article was shared on social media.
+The UCI Online News Popularity dataset contains 39,644 online news articles published by Mashable with 58 numeric features related to content, sentiment, topics, and publication timing. The target variable is `shares`, representing the number of times an article was shared on social media.
 
-The core script is **`report_2_task.py`**, which executes a comprehensive 12-step data science pipeline:
+The analysis is organized around **six specific tasks**, each addressing a real-world question:
 
-1. **Exploratory Data Analysis (EDA)** — Baseline distributions and summary statistics
-2. **Preprocessing Assessment** — Evaluating the impact of log-transformation and outlier removal
-3. **Data Preprocessing** — Handling missing values, scaling, and feature engineering
-4. **Classification** — Predicting high vs. low popularity using Logistic Regression and Random Forest
-5. **Regression** — Predicting exact share counts using Linear, Ridge, and Random Forest regressors
-6. **Clustering** — Unsupervised grouping using K-Means (Elbow method/Silhouette) and DBSCAN
-7. **Association Rule Mining** — Discovering itemsets that lead to high shares using Apriori
-8. **Dimensionality Reduction** — Visualizing the high-dimensional space with PCA and t-SNE
-9. **Temporal Analysis** — Analyzing engagement patterns on weekends vs. weekdays
-10. **Feature Importance** — Identifying the strongest drivers of virality using Gini and Permutation importance
-11. **Spark Pipeline** — Demonstrating distributed data processing using PySpark
-12. **ML Pipeline Comparison** — A robust evaluation of 8 Classification and 7 Regression algorithms, tracking metrics before and after advanced preprocessing
+| Task | Name | Type |
+|------|------|------|
+| 1 | Predicting Whether a News Article Will Be Popular | Supervised - Binary Classification |
+| 2 | Predicting the Number of Shares an Article Will Receive | Supervised - Regression |
+| 3 | Discovering Natural Groupings of News Articles | Unsupervised - Clustering |
+| 4 | Identifying Content Patterns Associated with High Engagement | Unsupervised - Association Rules |
+| 5 | Optimizing Article Formatting and Media Usage | Supervised - Regression |
+| 6 | Recommending the Optimal Publication Window | Supervised - Binary Classification |
+| -- | Spark-Based Scalability Demonstration | PySpark Random Forest |
+
+### Pipeline Execution Order
+
+1. **Data Cleaning** - Missing values, duplicates, outlier analysis
+2. **Exploratory Data Analysis** - Distributions, correlations, temporal patterns
+3. **Feature Engineering** - Correlation filtering, RF importance, select top 29 features
+4. **Dimensionality Reduction** - PCA and t-SNE on selected features
+5. **Task 1** - Popularity classification (8 models, before/after preprocessing)
+6. **Task 2** - Share count regression (7 models, before/after preprocessing)
+7. **Task 3** - Clustering (K-Means + DBSCAN)
+8. **Task 4** - Association rule mining (Apriori)
+9. **Task 5** - Formatting analysis (4 regression models)
+10. **Task 6** - Publication timing classification (4 models)
+11. **Spark Pipeline** - PySpark Random Forest scalability demo
 
 ## Repository Structure
 
@@ -44,36 +66,29 @@ The core script is **`report_2_task.py`**, which executes a comprehensive 12-ste
 .
 ├── data/
 │   ├── full_dataset.csv             # Full dataset (39,644 rows)
-│   └── subset.csv                   # 500-row deterministic subset for quick testing
-├── figures/                         # Over 25 generated data visualizations
+│   └── subset.csv                   # ~500-row subset for quick testing
+├── figures/                         # Generated data visualizations
 ├── results/                         # Output CSVs for ML metric comparisons
+├── report_2/                        # LaTeX report source files
+│   ├── main.tex                     # Main document
+│   ├── sections/                    # Report sections
+│   └── figures/                     # Report-specific figures
 ├── src/
-│   ├── preprocessing.py             # Data loading, cleaning, log-transforms, scaling
-│   ├── eda.py                       # Advanced plotting for Data Distributions
-│   ├── classification.py            # Base Classification tasks
-│   ├── regression.py                # Base Regression tasks
-│   ├── clustering.py                # K-Means + DBSCAN with PCA 2D scatter
-│   ├── association_rules.py         # Apriori (min_support adaptive sizing)
-│   ├── dimensionality_reduction.py  # PCA + t-SNE with variance ratios
-│   ├── temporal_analysis.py         # Weekday/weekend comparative analysis
-│   ├── feature_importance.py        # Random Forest Gini + Permutation importance
-│   ├── spark_pipeline.py            # PySpark MLlib distributed equivalent
-│   ├── ml_pipeline_comparison.py    # Cross-algorithm evaluation (Before vs After preprocessing)
-│   └── ml_visualizations.py         # Advanced ML charts (ROC, Learning Curves, Heatmaps)
-├── report_2_task.py                 # Unified full pipeline runner (Entry point)
+│   ├── data_cleaning.py             # Explicit data cleaning with full visibility
+│   ├── preprocessing.py             # Train/test splits, before/after preprocessing
+│   ├── eda.py                       # Exploratory data analysis and plots
+│   ├── feature_importance.py        # RF importance, feature selection (90% threshold)
+│   ├── dimensionality_reduction.py  # PCA + t-SNE on selected features
+│   ├── classification.py            # Task 1 + Task 6 classification
+│   ├── regression.py                # Task 2 + Task 5 regression
+│   ├── clustering.py                # Task 3: K-Means + DBSCAN
+│   ├── association_rules.py         # Task 4: Apriori rules
+│   ├── temporal_analysis.py         # Weekday/weekend analysis
+│   └── spark_pipeline.py            # PySpark MLlib pipeline
+├── report_2_task.py                 # Main entry point
 ├── requirements.txt                 # Python dependencies
 └── README.md                        # This file
 ```
-
-## Key Findings
-
-- **Ensemble Dominance:** Non-linear ensemble algorithms (Random Forest, Gradient Boosting) consistently outperformed linear models, achieving the highest Classification Accuracy (~66%) and ROC-AUC.
-- **Predictive Ceiling:** Exact regression prediction of social media shares is inherently difficult; all regression models achieved low R² scores close to zero.
-- **Top Features:** Keyword metrics (`kw_avg_avg`, `kw_max_avg`) and topic relevance (LDA features) are the strongest predictors of share counts.
-- **Temporal Patterns:** Articles published on weekends exhibit significantly higher average share counts (~3,903) compared to weekday articles (~3,319).
-- **Association Rules:** Apriori mining revealed that weekend publication, tech channel designation, and Friday publication are meaningful indicators of high virality.
-
-*(For full technical analysis, review the generated charts in the `figures/` directory and metrics in `results/` following execution).*
 
 ## Requirements
 
@@ -81,11 +96,9 @@ The core script is **`report_2_task.py`**, which executes a comprehensive 12-ste
 | Requirement | Version | Install |
 |---|---|---|
 | **Java 17 LTS** | Temurin 17 | `brew install --cask temurin@17` |
-| Python | 3.7+ | — |
+| Python | 3.7+ | --- |
 
-> ⚠️ **Java 17 is strictly required for PySpark.** Newer versions of Java (21, 23+) remove internal APIs that PySpark depends on, resulting in `PySparkRuntimeError: [JAVA_GATEWAY_EXITED]`. 
-
-After installing Java 17, set `JAVA_HOME` and persist it (macOS ZSH):
+After installing Java 17, set `JAVA_HOME`:
 ```bash
 export JAVA_HOME=$(/usr/libexec/java_home -v 17)
 echo 'export JAVA_HOME=$(/usr/libexec/java_home -v 17)' >> ~/.zshrc
@@ -100,27 +113,6 @@ echo 'export JAVA_HOME=$(/usr/libexec/java_home -v 17)' >> ~/.zshrc
 - scikit-learn >= 1.3.0
 - mlxtend >= 0.23.0
 - pyspark >= 3.4.0
-- ucimlrepo >= 0.0.7
-
-## Usage
-
-**Activate Virtual Environment:**
-Always activate the virtual environment before running the project:
-```bash
-source .venv/bin/activate
-```
-
-**Execute Full Analysis Suite:**
-To run the full end-to-end Big Data pipeline on the comprehensive dataset:
-```bash
-python report_2_task.py data/full_dataset.csv
-```
-
-**Output Generated:**
-Execution of the pipeline will populate the following:
-1. Console: Printed metric readouts and step-by-step progress logging
-2. `figures/`: Dozens of high-resolution `.png` charts characterizing the data and models
-3. `results/`: `.csv` data dumps for ML model comparisons outperforming basic metrics
 
 ## License
 Created for University Big Data analysis coursework. Dataset is publicly available from the UCI Machine Learning Repository (CC BY 4.0).

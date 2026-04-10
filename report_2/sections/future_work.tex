@@ -1,0 +1,11 @@
+\section{Future Work}
+
+Several directions could extend this project in meaningful ways.
+
+First, for interpretability, future studies could apply SHAP (SHapley Additive exPlanations) values or partial dependence analysis more extensively to better explain how individual features influence model predictions at the instance level.
+
+Second, the feature engineering pipeline could be improved by incorporating text-based features extracted directly from article content (e.g., TF-IDF, word embeddings), which are not available in the current dataset but could provide stronger predictive signals.
+
+Third, the class imbalance issue in Task~6 could be addressed using techniques such as SMOTE (Synthetic Minority Oversampling), class-weighted models, or alternative evaluation metrics such as balanced accuracy.
+
+Finally, the Spark pipeline could be extended to larger datasets or deployed in a multi-node cluster setting to evaluate performance, scalability, and distributed training behavior under true big-data conditions.

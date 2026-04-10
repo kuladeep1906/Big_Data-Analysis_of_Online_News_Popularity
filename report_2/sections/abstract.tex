@@ -1,0 +1,10 @@
+\section*{Abstract}
+\addcontentsline{toc}{section}{Abstract}
+
+This project analyzes the Online News Popularity dataset to understand and predict user engagement with online news articles. The study is organized around a set of clearly defined data analytics tasks rather than a purely method-based workflow. These tasks include popularity classification, share prediction, clustering, engagement pattern discovery, formatting analysis, publication timing analysis, and a Spark-based scalability demonstration.
+
+The dataset contains 39,644 articles described by numerical features related to article content, keyword statistics, topic distributions, sentiment, media usage, and publication timing. After data cleaning and exploratory analysis, a structured feature engineering pipeline was applied, including correlation filtering, feature importance ranking, feature selection, and dimensionality reduction. This allowed the analysis to focus on the most informative variables while reducing redundancy in the input space.
+
+Across the predictive tasks, ensemble models such as Gradient Boosting and Random Forest performed better than simpler linear and distance-based methods, indicating that article popularity is influenced by non-linear relationships among features. Exploratory tasks showed that the dataset has limited natural cluster separation, but still revealed useful patterns such as stronger engagement for weekend and technology-related articles. A focused formatting task provided interpretable insights into how links, images, videos, and article length relate to engagement, although these factors alone explain only a limited portion of the variation in shares.
+
+Overall, the project demonstrates how predictive modeling, exploratory analysis, and feature-driven interpretation can be combined within a task-oriented structure to better understand online news popularity. The inclusion of a PySpark workflow further shows how the same analytical pipeline can be extended to scalable distributed environments.

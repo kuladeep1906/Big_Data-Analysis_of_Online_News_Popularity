@@ -1,0 +1,13 @@
+\section{Challenges Faced}
+
+Several challenges were encountered during the project.
+
+First, the target variable \texttt{shares} was highly skewed, with a small number of articles receiving extremely high engagement. This made regression especially difficult and required the use of a log transformation to stabilize the target distribution.
+
+Second, the original feature space contained a number of correlated variables, particularly among keyword-related and self-reference features. This required careful feature selection to reduce redundancy without discarding too much information.
+
+Third, not all analytical tasks were equally strong. Some tasks, such as classification and regression, produced meaningful results, while others, such as clustering and publication timing prediction, showed weaker structure and required more cautious interpretation.
+
+A further challenge was balancing practical interpretability with predictive performance. Models such as Gradient Boosting and Random Forest performed better, but simpler models were still necessary for comparison and interpretation.
+
+Finally, the project required restructuring from a method-centered workflow into a task-oriented one. This created a more coherent report, but also required the analytical pipeline and the report narrative to be aligned carefully.

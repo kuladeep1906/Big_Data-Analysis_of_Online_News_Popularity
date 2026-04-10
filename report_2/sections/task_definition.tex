@@ -1,0 +1,59 @@
+\section{Task Definition}
+
+To ensure clarity of objectives, the project is organized around six specific data analytics tasks. Each task addresses a meaningful question related to online news popularity and helps connect the technical analysis to real-world interpretation. For each task, the input features, output target, and task type are explicitly stated so that the experimental setup can be reproduced.
+
+\subsection{Task 1: Predicting Whether a News Article Will Be Popular}
+\textbf{Real-World Question:} Given an article's content features, can we classify it as popular or unpopular before publication?
+
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Type:} Supervised --- Binary Classification
+    \item \textbf{Input:} 29 selected features identified through preliminary feature analysis (see Section~\ref{sec:feature_engineering})
+    \item \textbf{Output:} Binary label --- Popular (1) if shares $\geq$ median (1400), Unpopular (0) otherwise
+\end{itemize}
+
+\subsection{Task 2: Predicting the Number of Shares an Article Will Receive}
+\textbf{Real-World Question:} Can we estimate how many shares an article will receive based on its measurable properties?
+
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Type:} Supervised --- Regression
+    \item \textbf{Input:} Same 29 selected features as Task~1
+    \item \textbf{Output:} Continuous value --- $\log(1 + \texttt{shares})$
+\end{itemize}
+
+\subsection{Task 3: Discovering Natural Groupings of News Articles}
+\textbf{Real-World Question:} Do news articles naturally separate into distinct groups based on their content, sentiment, and structural characteristics?
+
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Type:} Unsupervised --- Clustering
+    \item \textbf{Input:} 29 selected features (scaled with StandardScaler)
+    \item \textbf{Output:} Cluster labels assigned by K-Means and DBSCAN
+\end{itemize}
+
+\subsection{Task 4: Identifying Content Patterns Associated with High Engagement}
+\textbf{Real-World Question:} What combinations of article properties (weekend, channel, topic) tend to co-occur in highly shared articles?
+
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Type:} Unsupervised --- Association Rule Mining
+    \item \textbf{Input:} Binary indicator features (weekday flags, channel flags, binarized popularity target)
+    \item \textbf{Output:} Association rules with support, confidence, and lift scores
+\end{itemize}
+
+\subsection{Task 5: Optimizing Article Formatting and Media Usage for Maximum Reach}
+\textbf{Real-World Question:} What is the optimal combination of text length, links, and media (images/videos) to drive shares?
+
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Type:} Supervised --- Regression (with focus on feature coefficients)
+    \item \textbf{Input:} 6 structural formatting features only: \texttt{n\_tokens\_title}, \texttt{n\_tokens\_content}, \texttt{num\_imgs}, \texttt{num\_videos}, \texttt{num\_hrefs}, \texttt{num\_self\_hrefs}
+    \item \textbf{Output:} Continuous value --- $\log(1 + \texttt{shares})$
+\end{itemize}
+
+\subsection{Task 6: Recommending the Optimal Publication Window (Weekday vs.\ Weekend)}
+\textbf{Real-World Question:} Given the emotional tone and topic of a drafted article, is it better suited for a weekday or weekend release?
+
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Type:} Supervised --- Binary Classification
+    \item \textbf{Input:} 26 features: 16 NLP/sentiment features, 5 channel indicators, and 5 LDA topic features (Latent Dirichlet Allocation topic closeness scores)
+    \item \textbf{Output:} Binary label --- Weekday (0) or Weekend (1)
+\end{itemize}
+
+\noindent\textit{Note: The dataset does not contain hour-level publication timestamps; only weekday indicator columns are available. Therefore, this task uses weekday vs.\ weekend as the temporal dimension rather than a 24-hour analysis.}

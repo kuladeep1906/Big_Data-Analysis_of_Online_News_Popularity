@@ -1,0 +1,67 @@
+\section{Task-Oriented Methodology}
+
+All supervised tasks share a common experimental setup to ensure reproducibility. The dataset was split into 80\% training and 20\% test sets using a fixed random seed of 42. For classification tasks, the split was stratified on the target label. Each task was evaluated under two conditions --- before preprocessing (imputed only) and after preprocessing (imputed + StandardScaler) --- as defined in Section~\ref{sec:preprocessing_definition}.
+
+\subsection{Task 1: Predicting Whether a News Article Will Be Popular}
+Task 1 is formulated as a supervised binary classification problem. The input consists of the 29 selected features, and the output is a binary label indicating whether an article is popular (shares $\geq$ 1400, the dataset median) or unpopular.
+
+Eight classification models were evaluated:
+\begin{enumerate}[leftmargin=1.5em]
+    \item \textit{Linear:} Logistic Regression \cite{hosmer2013logistic}
+    \item \textit{Distance-based:} K-Nearest Neighbors (KNN), Support Vector Machine (SVM)
+    \item \textit{Tree-based ensembles:} Decision Tree, Random Forest \cite{breiman2001rf,biau2016rf}, Gradient Boosting, AdaBoost
+    \item \textit{Probabilistic:} Naive Bayes
+\end{enumerate}
+
+Performance is assessed using accuracy, precision, recall, F1-score, and ROC-AUC. Models are grouped by family to identify which \textit{group} of models performs best overall.
+
+\subsection{Task 2: Predicting the Number of Shares an Article Will Receive}
+Task 2 is formulated as a supervised regression problem. The goal is to estimate article engagement using the transformed target $\log(1 + \texttt{shares})$. This transformation is applied because the original share counts are highly right-skewed with a long tail.
+
+Seven regression models were evaluated:
+\begin{enumerate}[leftmargin=1.5em]
+    \item \textit{Linear:} Linear Regression, Ridge Regression \cite{montgomery2012linear,hoerl1970ridge}, Lasso Regression
+    \item \textit{Tree-based ensembles:} Decision Tree Regressor, Random Forest Regressor \cite{breiman2001rf}, Gradient Boosting Regressor
+    \item \textit{Distance-based:} Support Vector Regression (SVR)
+\end{enumerate}
+
+Performance is evaluated using RMSE (log and original scale), MAE (log scale), and $R^2$.
+
+\subsection{Task 3: Discovering Natural Groupings of News Articles}
+Task 3 is an unsupervised clustering task designed to explore whether articles form natural groups in the 29-feature space. All features were scaled using StandardScaler before clustering. Two methods were used:
+
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{K-Means} \cite{macqueen1967kmeans}: tested for $k = 2, 3, \ldots, 10$ with $n\_init = 10$ and random seed 42. The optimal $k$ was selected using the highest silhouette score.
+    \item \textbf{DBSCAN} \cite{ester1996dbscan}: run with $\epsilon = 3.0$ and $min\_samples = 10$ as a density-based alternative that can detect irregular cluster shapes and identify noise points.
+\end{itemize}
+
+Cluster quality is evaluated using silhouette scores, inertia (elbow method), and descriptive profiling of each detected group.
+
+\subsection{Task 4: Identifying Content Patterns Associated with High Engagement}
+Task 4 applies association rule mining to identify combinations of binary indicators that tend to occur in high-share articles. The analysis uses the dataset's 13 binary indicator columns (7 weekday flags and 6 channel flags) along with a binarized popularity target (shares $\geq$ median).
+
+The Apriori algorithm \cite{agrawal1994association} is applied with adaptive minimum support ($\max(0.05, 50 / N)$ where $N$ is the number of rows), minimum confidence of 0.3, and minimum lift of 1.01 to filter out trivial rules. Rules are evaluated using support, confidence, and lift.
+
+\subsection{Task 5: Optimizing Article Formatting and Media Usage for Maximum Reach}
+Task 5 focuses on a smaller set of 6 structural article features: \texttt{n\_tokens\_title}, \texttt{n\_tokens\_content}, \texttt{num\_imgs}, \texttt{num\_videos}, \texttt{num\_hrefs}, and \texttt{num\_self\_hrefs}. The target is $\log(1 + \texttt{shares})$.
+
+This task is approached as a focused regression problem using four models: Ridge Regression, Lasso Regression, Random Forest Regressor, and Gradient Boosting Regressor. In addition to model performance, the analysis examines model coefficients and feature importance scores to provide interpretable insights about how article formatting choices relate to engagement.
+
+\subsection{Task 6: Recommending the Optimal Publication Window (Weekday vs.\ Weekend)}
+Task 6 explores whether article content and tone can help distinguish weekday versus weekend publication behavior. This is framed as a binary classification problem where the output indicates weekday (0) or weekend (1).
+
+The input consists of 26 features: 16 NLP/sentiment features (subjectivity, polarity, positive/negative word rates), 5 channel indicators, and 5 LDA topic features (\texttt{LDA\_00} through \texttt{LDA\_04}, which are Latent Dirichlet Allocation topic closeness scores pre-computed in the original dataset).
+
+\textit{Note:} The dataset does not contain hour-level publication timestamps. Only binary weekday indicators (\texttt{weekday\_is\_monday} through \texttt{weekday\_is\_sunday}) and an \texttt{is\_weekend} flag are available. Therefore, this task uses weekday vs.\ weekend as the temporal dimension.
+
+Four models are used: Logistic Regression, Random Forest, Gradient Boosting, and SVM. Performance is evaluated using accuracy, precision, recall, F1-score, and ROC-AUC. Because the weekend class represents only about 13\% of articles, the interpretation places strong emphasis on class imbalance and the limitations of using accuracy alone.
+
+\subsection{Spark-Based Scalability Demonstration}
+In addition to the six analytical tasks, a PySpark workflow is included as a scalability demonstration \cite{zaharia2016spark}. The pipeline consists of three stages:
+\begin{enumerate}[leftmargin=1.5em]
+    \item \textbf{VectorAssembler}: combines all feature columns into a single feature vector
+    \item \textbf{StandardScaler}: normalizes features (with mean and standard deviation)
+    \item \textbf{Random Forest Classifier}: trained with 100 trees and random seed 42
+\end{enumerate}
+
+The data was split 80/20 (seed 42) and the same median-based popularity threshold from Task~1 was used. The Spark results are compared with the scikit-learn Random Forest implementation to examine consistency and portability across frameworks.
